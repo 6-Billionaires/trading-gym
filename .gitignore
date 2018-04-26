@@ -1,0 +1,5 @@
+gipython
+*.pyc
+.idea
+*.iml
+docs/_build
