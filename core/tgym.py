@@ -1,8 +1,14 @@
 import logging
 from gym.core import Env
-
+import pandas as pd
+import glob
+from util.Exception import TradingException
 
 class TradingGymEnv(Env):
+
+    orders = []  # save orders of episode type
+    quotes = []  # save quotes of episode type
+
 
     """
     This class's super class is from OpenAI Gym and extends to provide trading environment
@@ -36,10 +42,11 @@ class TradingGymEnv(Env):
         pass
 
 
-    def __init__(self, episode_duration_min = 390, obs_transform=None):
+    def __init__(self, episode_type=None, episode_duration_min = 390, obs_transform=None):
         """
         episode_duration_min = 390
         """
+        self.episode_type = None
         self.n_actions = None
         self.state_shape = None
         self.episode_duration_min = 390
@@ -47,7 +54,19 @@ class TradingGymEnv(Env):
         self.ob_transform = obs_transform
 
         #TODO : load all data of ticker from database into memory
+        # It loads csv files of its episode type above into memory and the csv files locate in a directory
+        # where trading-episode-filter gathered according to rules of episode type
 
+        # csv format is look like below
+        # episode_type-sequence_number-AAPL-yyyymmdd-quote.csv, episode_type-sequence_number-AAPL-yyyymmdd-order.csv
+
+        for item in glob.glob(episode_type + '-*.csv') :
+            if item.endswith('-order.csv'):
+                self.orders.append(pd.read_csv(item))
+            elif item.endswith('-quotes.csv'):
+                self.episode_type.append(pd.read_csv(item))
+            else:
+                raise TradingException('it found out a file followed by wrong convension.')
 
     def _rewards(self):
         pass
@@ -79,7 +98,6 @@ class TradingGymEnv(Env):
 
 
     def step(self, action):
-
         """
         action :
         for now, we just make action -1 or 1 ( buy all or sell all!! )
