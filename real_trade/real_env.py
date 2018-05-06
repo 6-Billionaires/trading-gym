@@ -101,7 +101,11 @@ class RealEnv(QAxWidget):
 
         pass
 
-    def get_observation(self):
+    def get_observation(self, code):
+        for stock_tmp in self.container.container:
+            if stock_tmp.code == str(code):
+                stock = stock_tmp
+                break
         pass
 
     def _set_balance(self):
@@ -120,6 +124,10 @@ class RealEnv(QAxWidget):
                          [rqname, screen_no, acc_no, order_type, code, quantity, price, hoga, order_no])
 
     def _receive_chejan_data(self, gubun, item_cnt, fid_list):
+        pass
+
+    def reset(self):
+        # sell all stock
         pass
 
     # environment 의 형태가 잡혀야 구현 가능한 부분은 추후 업데이트
