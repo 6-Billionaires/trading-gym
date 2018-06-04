@@ -193,6 +193,9 @@ class TradingGymEnv(Env):
         if not self.is_data_loaded:
             self.episode_data_count = self.create_episode_data(episode_type)
 
+        # for now, episode type is not considered.
+        #self.p_agent_current_episode_ref_idx = random.randint(0, self.episode_data_count - 1)
+
         self.c_episode_max_step_count = 60 * episode_duration_min
 
         self.reset()
@@ -208,15 +211,10 @@ class TradingGymEnv(Env):
 
         p_agent_current_episode_price_history = deque(maxlen=self.episode_duration_min)
 
-        self.c_agent_range_timestamp = pd.date_range(
-            self.c_agent_step_start_datetime_in_episode, periods=self.c_episode_max_step_count+1, freq='S')
-
         self.p_agent_current_step_in_episode = 0
         self.p_agent_max_num_of_allowed_transaction = max_num_of_transaction
         self.p_agent_is_stop_loss_price = None
 
-        # for now, episode type is not considered.
-        self.p_agent_current_episode_ref_idx = random.randint(0, self.episode_data_count-1)
 
     def init_observation(self):
         return self._get_observation()
@@ -322,6 +320,9 @@ class TradingGymEnv(Env):
                                                                         int(current_date[4:6]),
                                                                         int(current_date[6:8]), 9, 6)
 
+        self.c_agent_range_timestamp = pd.date_range(
+            self.c_agent_step_start_datetime_in_episode, periods=self.c_episode_max_step_count+1, freq='S')
+
         start = datetime.datetime(int(current_date[0:4]), int(current_date[4:6]), int(current_date[6:8]), 9, 5)
         prev_read_rng = \
             pd.date_range(start, periods=np.minimum(
@@ -332,7 +333,7 @@ class TradingGymEnv(Env):
             self.p_agent_current_episode_price_history.append(
                     self.p_agent_current_episode_data_quote.loc[prev_time_step]['Price(last excuted)'])
 
-        return True
+        return self._get_observation()
 
     def render(self):
         """

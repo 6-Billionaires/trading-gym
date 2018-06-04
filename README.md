@@ -39,3 +39,8 @@ gave good idea to structure project frame
 Algorithms collections based on OpenAI Gym
 - https://github.com/rll/rllab
 
+### Package
+setup.py
+https://www.digitalocean.com/community/tutorials/how-to-write-modules-in-python-3#accessing-modules-from-another-directory
+upload package into pip
+https://stackoverflow.com/questions/15746675/how-to-write-a-python-module-package
