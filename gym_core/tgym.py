@@ -12,7 +12,6 @@ import os
 from collections import deque
 
 C_HOME_FULL_DIR = config.GYM['HOME']
-f
 
 class TradingGymEnv(Env):
 
