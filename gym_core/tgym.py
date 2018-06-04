@@ -8,6 +8,7 @@ import random
 import datetime
 import math
 import config
+import os
 
 C_HOME_FULL_DIR = config.GYM['HOME']
 
@@ -130,9 +131,15 @@ class TradingGymEnv(Env):
 
                 # TODO : it needs to be update load dataset out of file into pandas dataframe
                 if f.endswith('-order.csv'):
-                    d_order = pd.read_csv(item+'/'+f, index_col=0, parse_dates=True)  # 2
+                    if os.path.sep == '\\' :
+                        d_order = pd.read_csv(item+'/'+f, index_col=0, parse_dates=True)  # 2
+                    else:
+                        d_order = pd.read_csv(f, index_col=0, parse_dates=True)  # 2
                 elif f.endswith('-quote.csv'):
-                    d_quote = pd.read_csv(item+'/'+f, index_col=0, parse_dates=True)  # 3
+                    if os.path.sep == '\\':
+                        d_quote = pd.read_csv(item+'/'+f, index_col=0, parse_dates=True)  # 3
+                    else:
+                        d_order = pd.read_csv(f, index_col=0, parse_dates=True)  # 2
                 else:
                     pass
                     #raise TradingException('it found out a file followed by wrong convention.')
