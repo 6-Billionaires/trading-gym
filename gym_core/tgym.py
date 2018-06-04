@@ -8,6 +8,8 @@ import random
 import datetime
 import math
 import config
+import os
+from collections import deque
 
 C_HOME_FULL_DIR = config.GYM['HOME']
 
@@ -33,7 +35,7 @@ class TradingGymEnv(Env):
     p_agent_current_episode_data_order = None
     p_agent_current_episode_ticker = None
     p_agent_current_episode_date = None
-    p_agent_current_episode_price_history = []
+    p_agent_current_episode_price_history = deque(maxlen=60)
     p_agent_current_step_in_episode = 0 # step interval = 1sec
     p_agent_max_num_of_allowed_transaction = 10
 
@@ -130,9 +132,16 @@ class TradingGymEnv(Env):
 
                 # TODO : it needs to be update load dataset out of file into pandas dataframe
                 if f.endswith('-order.csv'):
-                    d_order = pd.read_csv(f, index_col=0, parse_dates=True)  # 2
+
+                    if os.path.sep == '\\' :
+                        d_order = pd.read_csv(item+'/'+f, index_col=0, parse_dates=True)  # 2
+                    else:
+                        d_order = pd.read_csv(f, index_col=0, parse_dates=True)  # 2
                 elif f.endswith('-quote.csv'):
-                    d_quote = pd.read_csv(f, index_col=0, parse_dates=True)  # 3
+                    if os.path.sep == '\\':
+                        d_quote = pd.read_csv(item+'/'+f, index_col=0, parse_dates=True)  # 3
+                    else:
+                        d_quote = pd.read_csv(f, index_col=0, parse_dates=True)  # 2
                 else:
                     pass
                     #raise TradingException('it found out a file followed by wrong convention.')
@@ -225,10 +234,7 @@ class TradingGymEnv(Env):
         p0 = self.d_episodes_data[self.p_agent_current_episode_ref_idx]['quote'].loc[self.c_agent_range_timestamp[self.p_agent_current_step_in_episode]]
         p1 = self.d_episodes_data[self.p_agent_current_episode_ref_idx]['order'].loc[self.c_agent_range_timestamp[self.p_agent_current_step_in_episode]]
         p2 = self.p_agent_current_episode_price_history
-        # print(p0)
-        # print(p1)
-        # print(p2)
-        # input()
+
         return p0, p1, p2
 
     def step(self, action):
@@ -262,7 +268,7 @@ class TradingGymEnv(Env):
                 self.p_agent_is_stop_loss = True
                 self.p_agent_is_stop_loss_price = present_price #TODO: ASK1 is correct price for stop loss ?!
                 break
-            elif percent > 0 and self.percent_goal_profit >= np.abs(percent):
+            elif percent > 0 and self.percent_goal_profit <= np.abs(percent):
                 self.p_agent_is_reached_goal = True
                 if best_price < present_price:
                     best_price = present_price
