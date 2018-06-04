@@ -159,7 +159,7 @@ class TradingGymEnv(Env):
 
             self.d_episodes_data[idx] = d_episode_data
 
-            return len(self.d_episodes_data)
+        return len(self.d_episodes_data.keys())
 
     def __init__(self, episode_type=None, episode_duration_min = 60, step_interval='1s', percent_stop_loss=10, percent_goal_profit = 2,
                  balanace = None, max_num_of_transaction=10, obs_transform=None):
@@ -179,7 +179,7 @@ class TradingGymEnv(Env):
             percent_goal_profit
                 positive. percentage, if action from step results in this profit within duration, this action is considered as good and agent would get good reward from this action.
         """
-
+        self.episode_data_count = 0
         if not self.is_data_loaded:
             self.episode_data_count = self.create_episode_data(episode_type)
 
