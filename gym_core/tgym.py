@@ -35,6 +35,7 @@ class TradingGymEnv(Env):
     p_agent_current_episode_date = None
     p_agent_current_episode_price_history = []
     p_agent_current_step_in_episode = 0 # step interval = 1sec
+    p_agent_max_num_of_allowed_transaction = 10
 
     p_agent_is_stop_loss = None
     p_agent_is_reached_goal = None
@@ -74,7 +75,7 @@ class TradingGymEnv(Env):
         # TODO : here we need to decide whether or not episode ends right way or wait until end of duration of original duration
         if self.p_agent_current_num_transaction >= self.p_agent_max_num_of_allowed_transaction:
             return True
-        elif self._current_agent_time_stamp > self.episode_duration_min:
+        elif self.p_agent_current_step_in_episode > self.episode_duration_min * 60:
             return True
         elif self.p_agent_is_stop_loss:
             return True
@@ -160,8 +161,8 @@ class TradingGymEnv(Env):
 
             return len(self.d_episodes_data)
 
-    def __init__(self, episode_type=None, episode_duration_min = 60, step_interval='1s', percent_stop_loss=None, percent_goal_profit = 2,
-                 balanace = None, max_num_of_transaction=None, obs_transform=None):
+    def __init__(self, episode_type=None, episode_duration_min = 60, step_interval='1s', percent_stop_loss=10, percent_goal_profit = 2,
+                 balanace = None, max_num_of_transaction=10, obs_transform=None):
         """
         Initialize environment
 
@@ -195,6 +196,8 @@ class TradingGymEnv(Env):
         self.c_agent_range_timestamp = pd.date_range(
             self.c_agent_step_start_datetime_in_episode, periods=60*60, freq='S')
         self.p_agent_current_step_in_episode = 0
+        self.p_agent_max_num_of_allowed_transaction = max_num_of_transaction
+        self.p_agent_is_stop_loss_price = None
 
         # for now, episode type is not considered.
         self.p_agent_current_episode_ref_idx = random.randint(0, self.episode_data_count-1)
@@ -222,10 +225,10 @@ class TradingGymEnv(Env):
         p0 = self.d_episodes_data[self.p_agent_current_episode_ref_idx]['quote'].loc[self.c_agent_range_timestamp[self.p_agent_current_step_in_episode]]
         p1 = self.d_episodes_data[self.p_agent_current_episode_ref_idx]['order'].loc[self.c_agent_range_timestamp[self.p_agent_current_step_in_episode]]
         p2 = self.p_agent_current_episode_price_history
-        print(p0)
-        print(p1)
-        print(p2)
-        input()
+        # print(p0)
+        # print(p1)
+        # print(p2)
+        # input()
         return p0, p1, p2
 
     def step(self, action):
@@ -243,17 +246,17 @@ class TradingGymEnv(Env):
         """
         self.p_agent_current_step_in_episode = self.p_agent_current_step_in_episode + 1
 
-        base_price = self.p_agent_current_episode_data_quote['price']
+        base_price = self.p_agent_current_episode_data_quote.loc[self.c_agent_range_timestamp[self.p_agent_current_step_in_episode]]['Price(last excuted)']
         info = []
 
-        best_price = -1
+        best_price = -10000000000
         self.p_agent_is_stop_loss = False
         self.p_agent_is_reached_goal = False
 
-        for present_ts in range(self.c_agent_range_timestamp[self.p_agent_current_step_in_episode],
+        for present_ts in pd.date_range(self.c_agent_range_timestamp[self.p_agent_current_step_in_episode],
                                 self.c_agent_range_timestamp[self.p_agent_current_step_in_episode+60]):
 
-            present_price = self.p_agent_current_episode_data_quote[present_ts]['ASK1']
+            present_price = self.p_agent_current_episode_data_order.loc[present_ts]['BuyHoga1']
             percent = (present_price - base_price) / base_price * 100
             if not self.p_agent_is_reached_goal and percent < 0 and self.percent_stop_loss <= np.abs(percent):
                 self.p_agent_is_stop_loss = True
