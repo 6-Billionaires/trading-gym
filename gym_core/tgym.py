@@ -3,7 +3,7 @@ from gym.core import Env
 import pandas as pd
 import numpy as np
 import glob
-from util.Exception import TradingException
+from  util.Exception import TradingException
 import random
 import datetime
 import math
@@ -38,7 +38,6 @@ class TradingGymEnv(Env):
 
     p_agent_is_stop_loss = None
     p_agent_is_reached_goal = None
-
 
     is_data_loaded = False
     episode_data_count = 0
@@ -97,7 +96,7 @@ class TradingGymEnv(Env):
                 episode_type-AAPL-yyyymmdd-quote.csv,
                 episode_type-AAPL-yyyymmdd-order.csv
         """
-        for item in glob.glob(C_HOME_FULL_DIR + '/data/' + episode_type + '/*'):
+        for idx, item in enumerate(glob.glob(C_HOME_FULL_DIR + '/data/' + episode_type + '/*')):
             for pf in glob.glob(item + '/*.csv', ):
                 f = pf.split('\\')[-1]
                 """
@@ -123,37 +122,40 @@ class TradingGymEnv(Env):
 
                 d_meta = {'ticker': current_ticker, "date": current_date}  # 1
 
+                d_order = pd.DataFrame()
+                d_quote = pd.DataFrame()
+
                 # TODO : it needs to be update load dataset out of file into pandas dataframe
                 if f.endswith('-order.csv'):
-                    d_order = pd.read_csv(f)  # 2
-                elif f.endswith('-quotes.csv'):
-                    d_quote = pd.read_csv(f)  # 3
+                    d_order = pd.read_csv(item+'/'+f)  # 2
+                elif f.endswith('-quote.csv'):
+                    d_quote = pd.read_csv(item+'/'+f)  # 3
                 else:
                     raise TradingException('it found out a file followed by wrong convention.')
 
-                # TODO : delete below. it is just fake data of two above
-                d_order = pd.DataFrame(np.random.randn(3600, 20),
-                                       columns=['ask_price1', 'ask_price2', 'ask_price3', 'ask_price4', 'ask_price5',
-                                                'ask_price6', 'ask_price7', 'ask_price8', 'ask_price9', 'ask_price10',
-                                                'bid_price1', 'bid_price2', 'bid_price3', 'bid_price4', 'bid_price5',
-                                                'bid_price6', 'bid_price7', 'bid_price8', 'bid_price9', 'bid_price10',
-                                                ],
-                                       index=pd.date_range(start='1/1/2016', periods=60 * 60, freq='S'))
-
-                d_quote = pd.DataFrame(np.random.randn(3600, 11),
-                                       columns=['buy_amount', 'buy_weighted_price', 'sell_amount',
-                                                'sell_weighted_price', 'total_amount', 'total_weighted_price',
-                                                'executed_strength', 'open', 'high', 'low', 'present_price'],
-                                       index=pd.date_range(start='1/1/2016', periods=60 * 60, freq='S'))
+                # # TODO : delete below. it is just fake data of two above
+                # d_order = pd.DataFrame(np.random.randn(3600, 20),
+                #                        columns=['ask_price1', 'ask_price2', 'ask_price3', 'ask_price4', 'ask_price5',
+                #                                 'ask_price6', 'ask_price7', 'ask_price8', 'ask_price9', 'ask_price10',
+                #                                 'bid_price1', 'bid_price2', 'bid_price3', 'bid_price4', 'bid_price5',
+                #                                 'bid_price6', 'bid_price7', 'bid_price8', 'bid_price9', 'bid_price10',
+                #                                 ],
+                #                        index=pd.date_range(start='1/1/2016', periods=60 * 60, freq='S'))
+                #
+                # d_quote = pd.DataFrame(np.random.randn(3600, 11),
+                #                        columns=['buy_amount', 'buy_weighted_price', 'sell_amount',
+                #                                 'sell_weighted_price', 'total_amount', 'total_weighted_price',
+                #                                 'executed_strength', 'open', 'high', 'low', 'present_price'],
+                #                        index=pd.date_range(start='1/1/2016', periods=60 * 60, freq='S'))
 
                 d_episode_data = {}
                 d_episode_data['meta'] = d_meta
                 d_episode_data['quote'] = d_quote
                 d_episode_data['order'] = d_order
 
-                self.d_episodes_data[self.episode_idx] = d_episode_data
+                self.d_episodes_data[idx] = d_episode_data
 
-            return self.episode_idx
+            return len(self.d_episodes_data)
 
     def __init__(self, episode_type=None, episode_duration_min = 60, step_interval='1s', percent_stop_loss=None, percent_goal_profit = 2,
                  balanace = None, max_num_of_transaction=None, obs_transform=None):
@@ -177,6 +179,8 @@ class TradingGymEnv(Env):
         if not self.is_data_loaded:
             self.episode_data_count = self.create_episode_data(episode_type)
 
+        self.reset()
+
         # this parameter is belong to episode type so that it isn't necessary anymore.
         self.episode_duration_min = 60
         self.percent_stop_loss = percent_stop_loss
@@ -193,6 +197,7 @@ class TradingGymEnv(Env):
         self.p_agent_current_episode_ref_idx = random.randint(0, self.episode_data_count)
         self.p_agent_current_step_in_episode = 0
 
+    def init_observation(self):
         return self._get_observation()
 
     def _rewards(self):
@@ -200,6 +205,7 @@ class TradingGymEnv(Env):
         for now, reward is just additional information other than observation itself.
         @return: the price of the current episode's equity's price 60 secs ahead
         """
+        return None
 
     def _get_observation(self):
         """
@@ -211,8 +217,12 @@ class TradingGymEnv(Env):
         3. price history for 1 minute
         """
         p0 = self.d_episodes_data[self.p_agent_current_episode_ref_idx]['quote'][self.c_agent_range_timestamp[self.p_agent_current_step_in_episode]]
-        p1 =  self.d_episodes_data[self.p_agent_current_episode_ref_idx]['order'][self.c_agent_range_timestamp[self.p_agent_current_step_in_episode]]
+        p1 = self.d_episodes_data[self.p_agent_current_episode_ref_idx]['order'][self.c_agent_range_timestamp[self.p_agent_current_step_in_episode]]
         p2 = self.p_agent_current_episode_price_history
+        print(p0)
+        print(p1)
+        print(p2)
+        input()
         return p0, p1, p2
 
     def step(self, action):
@@ -248,11 +258,10 @@ class TradingGymEnv(Env):
                 break
             elif percent > 0 and self.percent_goal_profit >= np.abs(percent):
                 self.p_agent_is_reached_goal = True
-                if best_price < present_price :
+                if best_price < present_price:
                     best_price = present_price
             else:
                 pass
-
 
         return self._get_observation(), self._rewards(), self._is_done(), [{'stop_loss': self.p_agent_is_stop_loss,
                                                                             'stop_loss_price' :self.p_agent_is_stop_loss_price,
@@ -270,7 +279,7 @@ class TradingGymEnv(Env):
         Returns:
             numpy.array: The initial observation of the space. Initial reward is assumed to be 0.
         """
-        self.p_agent_current_episode_ref_idx = random.randint(0, self.episode_data_count)
+        self.p_agent_current_episode_ref_idx = random.randint(0, self.episode_data_count-1)
         self.p_agent_current_step_in_episode = 0
 
         self.p_agent_current_episode_ticker = self.d_episodes_data[self.p_agent_current_episode_ref_idx]['meta']['ticker']
