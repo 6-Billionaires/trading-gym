@@ -130,9 +130,9 @@ class TradingGymEnv(Env):
 
                 # TODO : it needs to be update load dataset out of file into pandas dataframe
                 if f.endswith('-order.csv'):
-                    d_order = pd.read_csv(item+'/'+f, index_col=0, parse_dates=True)  # 2
+                    d_order = pd.read_csv(f, index_col=0, parse_dates=True)  # 2
                 elif f.endswith('-quote.csv'):
-                    d_quote = pd.read_csv(item+'/'+f, index_col=0, parse_dates=True)  # 3
+                    d_quote = pd.read_csv(f, index_col=0, parse_dates=True)  # 3
                 else:
                     pass
                     #raise TradingException('it found out a file followed by wrong convention.')
@@ -179,7 +179,7 @@ class TradingGymEnv(Env):
             percent_goal_profit
                 positive. percentage, if action from step results in this profit within duration, this action is considered as good and agent would get good reward from this action.
         """
-        self.episode_data_count = 0
+        # self.episode_data_count = 0
         if not self.is_data_loaded:
             self.episode_data_count = self.create_episode_data(episode_type)
 
