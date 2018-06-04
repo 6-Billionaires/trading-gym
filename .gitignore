@@ -4,3 +4,4 @@ gipython
 *.iml
 docs/_build
 config.py
+.idea/
