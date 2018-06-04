@@ -203,6 +203,7 @@ class TradingGymEnv(Env):
         self.ob_transform = obs_transform
         self.episode_duration_min = episode_duration_min
         self.c_episode_max_step_count = 60*episode_duration_min
+        p_agent_current_episode_price_history = deque(maxlen=self.episode_duration_min)
 
         self.c_agent_range_timestamp = pd.date_range(
             self.c_agent_step_start_datetime_in_episode, periods=self.c_episode_max_step_count, freq='S')
@@ -256,6 +257,8 @@ class TradingGymEnv(Env):
         self.p_agent_current_step_in_episode = self.p_agent_current_step_in_episode + 1
 
         base_price = self.p_agent_current_episode_data_quote.loc[self.c_agent_range_timestamp[self.p_agent_current_step_in_episode]]['Price(last excuted)']
+
+
         info = []
 
         best_price = -10000000000
@@ -268,7 +271,9 @@ class TradingGymEnv(Env):
         ):
 
             present_price = self.p_agent_current_episode_data_order.loc[present_ts]['BuyHoga1']
-            percent = (present_price - base_price) / base_price * 100
+
+            percent = ((present_price+100) - (base_price+100)) / ( base_price+100) * 100
+
             if not self.p_agent_is_reached_goal and percent < 0 and self.percent_stop_loss <= np.abs(percent):
                 self.p_agent_is_stop_loss = True
                 self.p_agent_is_stop_loss_price = present_price #TODO: ASK1 is correct price for stop loss ?!
