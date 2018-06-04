@@ -3,10 +3,11 @@ from gym.core import Env
 import pandas as pd
 import numpy as np
 import glob
-from util.Exception import TradingException
+from trading_gym.util.Exception import TradingException
 import random
 import datetime
 import math
+
 
 class TradingGymEnv(Env):
 
@@ -34,7 +35,6 @@ class TradingGymEnv(Env):
 
     p_agent_is_stop_loss = None
     p_agent_is_reached_goal = None
-
 
     is_data_loaded = False
     episode_data_count = 0
@@ -122,7 +122,7 @@ class TradingGymEnv(Env):
                 # TODO : it needs to be update load dataset out of file into pandas dataframe
                 if item.endswith('-order.csv'):
                     d_order = pd.read_csv(item)  # 2
-                elif item.endswith('-quotes.csv'):
+                elif item.endswith('-quote.csv'):
                     d_quote = pd.read_csv(item)  # 3
                 else:
                     raise TradingException('it found out a file followed by wrong convention.')
@@ -189,6 +189,7 @@ class TradingGymEnv(Env):
         self.p_agent_current_episode_ref_idx = random.randint(0, self.episode_data_count)
         self.p_agent_current_step_in_episode = 0
 
+    def init_observation(self):
         return self._get_observation()
 
     def _rewards(self):
@@ -196,6 +197,7 @@ class TradingGymEnv(Env):
         for now, reward is just additional information other than observation itself.
         @return: the price of the current episode's equity's price 60 secs ahead
         """
+        return None
 
     def _get_observation(self):
         """
@@ -207,8 +209,12 @@ class TradingGymEnv(Env):
         3. price history for 1 minute
         """
         p0 = self.d_episodes_data[self.p_agent_current_episode_ref_idx]['quote'][self.c_agent_range_timestamp[self.p_agent_current_step_in_episode]]
-        p1 =  self.d_episodes_data[self.p_agent_current_episode_ref_idx]['order'][self.c_agent_range_timestamp[self.p_agent_current_step_in_episode]]
+        p1 = self.d_episodes_data[self.p_agent_current_episode_ref_idx]['order'][self.c_agent_range_timestamp[self.p_agent_current_step_in_episode]]
         p2 = self.p_agent_current_episode_price_history
+        print(p0)
+        print(p1)
+        print(p2)
+        input()
         return p0, p1, p2
 
     def step(self, action):
@@ -244,11 +250,10 @@ class TradingGymEnv(Env):
                 break
             elif percent > 0 and self.percent_goal_profit >= np.abs(percent):
                 self.p_agent_is_reached_goal = True
-                if best_price < present_price :
+                if best_price < present_price:
                     best_price = present_price
             else:
                 pass
-
 
         return self._get_observation(), self._rewards(), self._is_done(), [{'stop_loss': self.p_agent_is_stop_loss,
                                                                             'stop_loss_price' :self.p_agent_is_stop_loss_price,
