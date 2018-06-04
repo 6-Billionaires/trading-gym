@@ -44,6 +44,7 @@ class TradingGymEnv(Env):
 
     is_data_loaded = False
     episode_data_count = 0
+    episode_duration_min = 60
 
     """
     This class's super class is from OpenAI Gym and extends to provide trading environment
@@ -192,25 +193,30 @@ class TradingGymEnv(Env):
         if not self.is_data_loaded:
             self.episode_data_count = self.create_episode_data(episode_type)
 
+        self.c_episode_max_step_count = 60 * episode_duration_min
+
         self.reset()
 
         # this parameter is belong to episode type so that it isn't necessary anymore.
-        self.episode_duration_min = 60
         self.percent_stop_loss = percent_stop_loss
         self.percent_goal_profit = percent_goal_profit
         self.n_actions = None
         self.state_shape = None
         self.interval = 1   # 1 second
         self.ob_transform = obs_transform
+        self.episode_duration_min = episode_duration_min
+
+        p_agent_current_episode_price_history = deque(maxlen=self.episode_duration_min)
+
         self.c_agent_range_timestamp = pd.date_range(
-            self.c_agent_step_start_datetime_in_episode, periods=60*60+100, freq='S')
+            self.c_agent_step_start_datetime_in_episode, periods=self.c_episode_max_step_count, freq='S')
+
         self.p_agent_current_step_in_episode = 0
         self.p_agent_max_num_of_allowed_transaction = max_num_of_transaction
         self.p_agent_is_stop_loss_price = None
 
         # for now, episode type is not considered.
         self.p_agent_current_episode_ref_idx = random.randint(0, self.episode_data_count-1)
-        self.p_agent_current_step_in_episode = 0
 
     def init_observation(self):
         return self._get_observation()
@@ -253,17 +259,23 @@ class TradingGymEnv(Env):
         self.p_agent_current_step_in_episode = self.p_agent_current_step_in_episode + 1
 
         base_price = self.p_agent_current_episode_data_quote.loc[self.c_agent_range_timestamp[self.p_agent_current_step_in_episode]]['Price(last excuted)']
+
+
         info = []
 
         best_price = -10000000000
         self.p_agent_is_stop_loss = False
         self.p_agent_is_reached_goal = False
 
-        for present_ts in pd.date_range(self.c_agent_range_timestamp[self.p_agent_current_step_in_episode],
-                                self.c_agent_range_timestamp[self.p_agent_current_step_in_episode+60]):
+        for present_ts in pd.date_range(
+                self.c_agent_range_timestamp[self.p_agent_current_step_in_episode],
+                self.c_agent_range_timestamp[self.p_agent_current_step_in_episode+60]
+        ):
 
             present_price = self.p_agent_current_episode_data_order.loc[present_ts]['BuyHoga1']
-            percent = (present_price - base_price) / base_price * 100
+
+            percent = ((present_price+100) - (base_price+100)) / ( base_price+100) * 100
+
             if not self.p_agent_is_reached_goal and percent < 0 and self.percent_stop_loss <= np.abs(percent):
                 self.p_agent_is_stop_loss = True
                 self.p_agent_is_stop_loss_price = present_price #TODO: ASK1 is correct price for stop loss ?!
@@ -310,7 +322,10 @@ class TradingGymEnv(Env):
                                                                         int(current_date[6:8]), 9, 6)
 
         start = datetime.datetime(int(current_date[0:4]), int(current_date[4:6]), int(current_date[6:8]), 9, 5)
-        prev_read_rng = pd.date_range(start, periods=60, freq='S')
+        prev_read_rng = \
+            pd.date_range(start, periods=np.min(
+                self.c_episode_max_step_count-self.p_agent_current_step_in_episode,
+                self.episode_duration_min*60), freq='S')
 
         for prev_time_step in prev_read_rng:
             self.p_agent_current_episode_price_history.append(
