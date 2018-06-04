@@ -80,7 +80,7 @@ class TradingGymEnv(Env):
         elif self.p_agent_current_step_in_episode > self.episode_duration_min * 60:
             return True
         elif self.p_agent_is_stop_loss:
-            return True
+            return False
         else:
             return False
 
@@ -203,7 +203,7 @@ class TradingGymEnv(Env):
         self.interval = 1   # 1 second
         self.ob_transform = obs_transform
         self.c_agent_range_timestamp = pd.date_range(
-            self.c_agent_step_start_datetime_in_episode, periods=60*60, freq='S')
+            self.c_agent_step_start_datetime_in_episode, periods=60*60+100, freq='S')
         self.p_agent_current_step_in_episode = 0
         self.p_agent_max_num_of_allowed_transaction = max_num_of_transaction
         self.p_agent_is_stop_loss_price = None
