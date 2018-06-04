@@ -97,6 +97,11 @@ class TradingGymEnv(Env):
                 episode_type-AAPL-yyyymmdd-order.csv
         """
         for idx, item in enumerate(glob.glob(C_HOME_FULL_DIR + '/data/' + episode_type + '/*')):
+
+            d_order = pd.DataFrame()
+            d_quote = pd.DataFrame()
+            d_meta = {}
+
             for pf in glob.glob(item + '/*.csv', ):
                 f = pf.split('\\')[-1]
                 """
@@ -122,16 +127,14 @@ class TradingGymEnv(Env):
 
                 d_meta = {'ticker': current_ticker, "date": current_date}  # 1
 
-                d_order = pd.DataFrame()
-                d_quote = pd.DataFrame()
-
                 # TODO : it needs to be update load dataset out of file into pandas dataframe
                 if f.endswith('-order.csv'):
-                    d_order = pd.read_csv(item+'/'+f)  # 2
+                    d_order = pd.read_csv(item+'/'+f, index_col=0, parse_dates=True)  # 2
                 elif f.endswith('-quote.csv'):
-                    d_quote = pd.read_csv(item+'/'+f)  # 3
+                    d_quote = pd.read_csv(item+'/'+f, index_col=0, parse_dates=True)  # 3
                 else:
-                    raise TradingException('it found out a file followed by wrong convention.')
+                    pass
+                    #raise TradingException('it found out a file followed by wrong convention.')
 
                 # # TODO : delete below. it is just fake data of two above
                 # d_order = pd.DataFrame(np.random.randn(3600, 20),
@@ -148,12 +151,12 @@ class TradingGymEnv(Env):
                 #                                 'executed_strength', 'open', 'high', 'low', 'present_price'],
                 #                        index=pd.date_range(start='1/1/2016', periods=60 * 60, freq='S'))
 
-                d_episode_data = {}
-                d_episode_data['meta'] = d_meta
-                d_episode_data['quote'] = d_quote
-                d_episode_data['order'] = d_order
+            d_episode_data = {}
+            d_episode_data['meta'] = d_meta
+            d_episode_data['quote'] = d_quote
+            d_episode_data['order'] = d_order
 
-                self.d_episodes_data[idx] = d_episode_data
+            self.d_episodes_data[idx] = d_episode_data
 
             return len(self.d_episodes_data)
 
@@ -194,7 +197,7 @@ class TradingGymEnv(Env):
         self.p_agent_current_step_in_episode = 0
 
         # for now, episode type is not considered.
-        self.p_agent_current_episode_ref_idx = random.randint(0, self.episode_data_count)
+        self.p_agent_current_episode_ref_idx = random.randint(0, self.episode_data_count-1)
         self.p_agent_current_step_in_episode = 0
 
     def init_observation(self):
@@ -216,8 +219,8 @@ class TradingGymEnv(Env):
         2. open high close low based on step_interval in env
         3. price history for 1 minute
         """
-        p0 = self.d_episodes_data[self.p_agent_current_episode_ref_idx]['quote'][self.c_agent_range_timestamp[self.p_agent_current_step_in_episode]]
-        p1 = self.d_episodes_data[self.p_agent_current_episode_ref_idx]['order'][self.c_agent_range_timestamp[self.p_agent_current_step_in_episode]]
+        p0 = self.d_episodes_data[self.p_agent_current_episode_ref_idx]['quote'].loc[self.c_agent_range_timestamp[self.p_agent_current_step_in_episode]]
+        p1 = self.d_episodes_data[self.p_agent_current_episode_ref_idx]['order'].loc[self.c_agent_range_timestamp[self.p_agent_current_step_in_episode]]
         p2 = self.p_agent_current_episode_price_history
         print(p0)
         print(p1)
@@ -301,7 +304,8 @@ class TradingGymEnv(Env):
         prev_read_rng = pd.date_range(start, periods=60, freq='S')
 
         for prev_time_step in prev_read_rng:
-            self.p_agent_current_episode_price_history.append(self.p_agent_current_episode_data_quote[prev_time_step]['price'])
+            self.p_agent_current_episode_price_history.append(
+                self.p_agent_current_episode_data_quote.loc[prev_time_step]['Price(last excuted)'])
 
         return True
 
