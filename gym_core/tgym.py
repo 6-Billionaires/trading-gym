@@ -13,6 +13,7 @@ from collections import deque
 
 C_HOME_FULL_DIR = config.GYM['HOME']
 
+
 class TradingGymEnv(Env):
 
     d_episodes_data = {}
@@ -43,6 +44,7 @@ class TradingGymEnv(Env):
 
     is_data_loaded = False
     episode_data_count = 0
+    episode_duration_min = 60
 
     """
     This class's super class is from OpenAI Gym and extends to provide trading environment
@@ -76,10 +78,10 @@ class TradingGymEnv(Env):
         # TODO : here we need to decide whether or not episode ends right way or wait until end of duration of original duration
         if self.p_agent_current_num_transaction >= self.p_agent_max_num_of_allowed_transaction:
             return True
-        elif self.p_agent_current_step_in_episode > self.episode_duration_min * 60:
+        elif self.p_agent_current_step_in_episode >= self.episode_duration_min * 60:
             return True
         elif self.p_agent_is_stop_loss:
-            return True
+            return False
         else:
             return False
 
@@ -143,7 +145,7 @@ class TradingGymEnv(Env):
                         d_quote = pd.read_csv(f, index_col=0, parse_dates=True)  # 2
                 else:
                     pass
-                    #raise TradingException('it found out a file followed by wrong convention.')
+                    #raise TradingException('it found out   a file followed by wrong convention.')
 
                 # # TODO : delete below. it is just fake data of two above
                 # d_order = pd.DataFrame(np.random.randn(3600, 20),
@@ -191,6 +193,8 @@ class TradingGymEnv(Env):
         if not self.is_data_loaded:
             self.episode_data_count = self.create_episode_data(episode_type)
 
+        self.c_episode_max_step_count = 60 * episode_duration_min
+
         self.reset()
 
         # this parameter is belong to episode type so that it isn't necessary anymore.
@@ -201,12 +205,11 @@ class TradingGymEnv(Env):
         self.interval = 1   # 1 second
         self.ob_transform = obs_transform
         self.episode_duration_min = episode_duration_min
-        self.c_episode_max_step_count = 60*episode_duration_min
+
         p_agent_current_episode_price_history = deque(maxlen=self.episode_duration_min)
 
         self.c_agent_range_timestamp = pd.date_range(
-            self.c_agent_step_start_datetime_in_episode, periods=self.c_episode_max_step_count, freq='S')
-
+            self.c_agent_step_start_datetime_in_episode, periods=self.c_episode_max_step_count+1, freq='S')
 
         self.p_agent_current_step_in_episode = 0
         self.p_agent_max_num_of_allowed_transaction = max_num_of_transaction
@@ -255,8 +258,8 @@ class TradingGymEnv(Env):
         """
         self.p_agent_current_step_in_episode = self.p_agent_current_step_in_episode + 1
 
-        base_price = self.p_agent_current_episode_data_quote.loc[self.c_agent_range_timestamp[self.p_agent_current_step_in_episode]]['Price(last excuted)']
-
+        base_price = self.p_agent_current_episode_data_quote.loc[
+            self.c_agent_range_timestamp[self.p_agent_current_step_in_episode]]['Price(last excuted)']
 
         info = []
 
@@ -266,7 +269,8 @@ class TradingGymEnv(Env):
 
         for present_ts in pd.date_range(
                 self.c_agent_range_timestamp[self.p_agent_current_step_in_episode],
-                self.c_agent_range_timestamp[self.p_agent_current_step_in_episode+60]
+                self.c_agent_range_timestamp[
+                    np.maximum(self.p_agent_current_step_in_episode, self.c_episode_max_step_count-1)]
         ):
 
             present_price = self.p_agent_current_episode_data_order.loc[present_ts]['BuyHoga1']
@@ -275,7 +279,7 @@ class TradingGymEnv(Env):
 
             if not self.p_agent_is_reached_goal and percent < 0 and self.percent_stop_loss <= np.abs(percent):
                 self.p_agent_is_stop_loss = True
-                self.p_agent_is_stop_loss_price = present_price #TODO: ASK1 is correct price for stop loss ?!
+                self.p_agent_is_stop_loss_price = present_price  # TODO: ASK1 is correct price for stop loss ?!
                 break
             elif percent > 0 and self.percent_goal_profit <= np.abs(percent):
                 self.p_agent_is_reached_goal = True
@@ -285,7 +289,7 @@ class TradingGymEnv(Env):
                 pass
 
         return self._get_observation(), self._rewards(), self._is_done(), [{'stop_loss': self.p_agent_is_stop_loss,
-                                                                            'stop_loss_price' :self.p_agent_is_stop_loss_price,
+                                                                            'stop_loss_price': self.p_agent_is_stop_loss_price,
                                                                             'reached_profit': self.p_agent_is_reached_goal,
                                                                             'best_price':best_price}]
 
@@ -319,11 +323,13 @@ class TradingGymEnv(Env):
                                                                         int(current_date[6:8]), 9, 6)
 
         start = datetime.datetime(int(current_date[0:4]), int(current_date[4:6]), int(current_date[6:8]), 9, 5)
-        prev_read_rng = pd.date_range(start, periods=60, freq='S')
+        prev_read_rng = \
+            pd.date_range(start, periods=np.minimum(
+                self.c_episode_max_step_count-self.p_agent_current_step_in_episode,
+                self.episode_duration_min*60), freq='S')
 
         for prev_time_step in prev_read_rng:
-            if prev_time_step <= self.c_episode_max_step_count :
-                self.p_agent_current_episode_price_history.append(
+            self.p_agent_current_episode_price_history.append(
                     self.p_agent_current_episode_data_quote.loc[prev_time_step]['Price(last excuted)'])
 
         return True
