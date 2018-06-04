@@ -7,6 +7,10 @@ from util.Exception import TradingException
 import random
 import datetime
 import math
+import config
+
+C_HOME_FULL_DIR = config.GYM['HOME']
+
 
 class TradingGymEnv(Env):
 
@@ -93,9 +97,9 @@ class TradingGymEnv(Env):
                 episode_type-AAPL-yyyymmdd-quote.csv,
                 episode_type-AAPL-yyyymmdd-order.csv
         """
-        for item in glob.glob('data/' + episode_type + '/*'):
+        for item in glob.glob(C_HOME_FULL_DIR + '/data/' + episode_type + '/*'):
             for pf in glob.glob(item + '/*.csv', ):
-                f = pf.split('\\')[2]
+                f = pf.split('\\')[-1]
                 """
                 1. condition
                     for now, there is only one episode type. 
@@ -120,10 +124,10 @@ class TradingGymEnv(Env):
                 d_meta = {'ticker': current_ticker, "date": current_date}  # 1
 
                 # TODO : it needs to be update load dataset out of file into pandas dataframe
-                if item.endswith('-order.csv'):
-                    d_order = pd.read_csv(item)  # 2
-                elif item.endswith('-quotes.csv'):
-                    d_quote = pd.read_csv(item)  # 3
+                if f.endswith('-order.csv'):
+                    d_order = pd.read_csv(f)  # 2
+                elif f.endswith('-quotes.csv'):
+                    d_quote = pd.read_csv(f)  # 3
                 else:
                     raise TradingException('it found out a file followed by wrong convention.')
 
