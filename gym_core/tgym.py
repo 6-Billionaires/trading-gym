@@ -376,7 +376,7 @@ class TradingGymEnv(Env):
 
         return self._get_observation()
 
-    def render(self):
+    def render(self, mode=None):
         """
         Render the environment.
         display agent and gym's status based on a user configures
