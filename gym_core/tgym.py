@@ -268,13 +268,12 @@ class TradingGymEnv(Env):
         for present_ts in pd.date_range(
                 self.c_agent_range_timestamp[self.p_agent_current_step_in_episode],
                 self.c_agent_range_timestamp[
-                    np.minimum(self.p_agent_current_step_in_episode+60, self.c_episode_max_step_count-1)]
+                    np.minimum(self.p_agent_current_step_in_episode+60, self.c_episode_max_step_count-1)], freq='S'
         ):
-
             present_price = self.p_agent_current_episode_data_order.loc[present_ts]['BuyHoga1']
 
+            # print(round(base_price, 3), round(present_price, 3))
             percent = ((present_price+100) - (base_price+100)) / ( base_price+100) * 100
-            print(percent)
 
             if not self.p_agent_is_reached_goal and percent < 0 and self.percent_stop_loss <= np.abs(percent):
                 self.p_agent_is_stop_loss = True
