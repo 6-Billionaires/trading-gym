@@ -242,23 +242,6 @@ class TradingGymEnv(Env):
         return np.append(np.append(p0, p1), p2)
 
     def step(self, action):
-<<<<<<< HEAD
-        if action == 0:
-            self.p_agent_current_step_in_episode += 1
-            next_base_price = self.p_agent_current_episode_data_order.loc[
-                self.c_agent_range_timestamp[self.p_agent_current_step_in_episode]]['SellHoga1']
-            if next_base_price <= -100:
-                can_buy = False
-            else:
-                can_buy = True
-            return self._get_observation(), self._rewards(), self._is_done(), [{'stop_loss': False,
-                                                                                'stop_loss_price': -1,
-                                                                                'reached_profit': False,
-                                                                                'best_price': -1,
-                                                                                'can_buy': can_buy}]
-=======
-
->>>>>>> 8212eab7d3919b6b48360e16ecc77c5bbfa807fe
         """
         Here is the interface to be called by its agent.
         _get_observation needs to be transformed using transform observation that __init__ received.
@@ -291,6 +274,8 @@ class TradingGymEnv(Env):
             _info['reached_profit'] = False
             _info['best_price'] = -1
             _info['can_buy'] = can_buy
+            _info['buy_price'] = -1
+            _info['last_price'] = -1
 
             _observation = self._get_observation()
             _done = self._is_done()
@@ -305,15 +290,22 @@ class TradingGymEnv(Env):
             best_price = -10000000000
             self.p_agent_is_stop_loss = False
             self.p_agent_is_reached_goal = False
+            buy_price = -1
+            last_price = -1
 
-            for present_ts in pd.date_range(
+            for idx, present_ts in enumerate(pd.date_range(
                     self.c_agent_range_timestamp[self.p_agent_current_step_in_episode],
                     self.c_agent_range_timestamp[
                         np.minimum(self.p_agent_current_step_in_episode+60, self.c_episode_max_step_count-1)], freq='S'
-            ):
+            )):
                 present_price = self.p_agent_current_episode_data_order.loc[present_ts]['BuyHoga1']
 
                 percent = ((present_price+100) - (base_price+100)) / ( base_price+100) * 100
+
+                if idx == 0:
+                    buy_price = self.p_agent_current_episode_data_order.loc[present_ts]['SellHoga1']
+                if idx == 59:  # if you change the window size, you must change it.
+                    last_price = self.p_agent_current_episode_data_order.loc[present_ts]['BuyHoga1']
 
                 if not self.p_agent_is_reached_goal and percent < 0 and self.percent_stop_loss <= np.abs(percent):
                     self.p_agent_is_stop_loss = True
@@ -341,6 +333,8 @@ class TradingGymEnv(Env):
             _info['reached_profit'] = self.p_agent_is_reached_goal
             _info['best_price'] = best_price
             _info['can_buy'] = can_buy
+            _info['buy_price'] = buy_price
+            _info['last_price'] = last_price
 
             _observation = self._get_observation()
             _done = self._is_done()
