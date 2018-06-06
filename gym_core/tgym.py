@@ -290,11 +290,18 @@ class TradingGymEnv(Env):
             self.p_agent_is_stop_loss = False
             self.p_agent_is_reached_goal = False
 
-            for present_ts in pd.date_range(
+            buy_price, last_price = -1, -1
+            for idx, present_ts in enumerate(pd.date_range(
                     self.c_agent_range_timestamp[self.p_agent_current_step_in_episode],
                     self.c_agent_range_timestamp[
                         np.minimum(self.p_agent_current_step_in_episode+60, self.c_episode_max_step_count-1)], freq='S'
-            ):
+            )):
+
+                if idx == 0:
+                    buy_price = self.p_agent_current_episode_data_order.loc[present_ts]['SellHoga1']
+                if idx == 59:  # if you change the time window, you must change it.
+                    last_price = self.p_agent_current_episode_data_order.loc[present_ts]['BuyHoga1']
+
                 present_price = self.p_agent_current_episode_data_order.loc[present_ts]['BuyHoga1']
 
                 percent = ((present_price+100) - (base_price+100)) / ( base_price+100) * 100
@@ -325,6 +332,8 @@ class TradingGymEnv(Env):
             _info['reached_profit'] = self.p_agent_is_reached_goal
             _info['best_price'] = best_price
             _info['can_buy'] = can_buy
+            _info['buy_price'] = buy_price
+            _info['last_price'] = last_price
 
             _observation = self._get_observation()
             _done = self._is_done()
