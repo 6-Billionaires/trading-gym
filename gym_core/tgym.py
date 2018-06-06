@@ -243,6 +243,19 @@ class TradingGymEnv(Env):
         return p0, p1, p2
 
     def step(self, action):
+        if action == 0:
+            self.p_agent_current_step_in_episode = self.p_agent_current_step_in_episode + 1
+            next_base_price = self.p_agent_current_episode_data_order.loc[
+                self.c_agent_range_timestamp[self.p_agent_current_step_in_episode]]['SellHoga1']
+            if next_base_price <= -100:
+                can_buy = False
+            else:
+                can_buy = True
+            return self._get_observation(), self._rewards(), self._is_done(), [{'stop_loss': False,
+                                                                                'stop_loss_price': -1,
+                                                                                'reached_profit': False,
+                                                                                'best_price': -1,
+                                                                                'can_buy': can_buy}]
         """
         Here is the interface to be called by its agent.
         _get_observation needs to be transformed using transform observation that __init__ received.
@@ -287,11 +300,18 @@ class TradingGymEnv(Env):
 
         # adding one step after all processes are done.
         self.p_agent_current_step_in_episode = self.p_agent_current_step_in_episode + 1
+        next_base_price = self.p_agent_current_episode_data_order.loc[
+            self.c_agent_range_timestamp[self.p_agent_current_step_in_episode]]['SellHoga1']
+        if next_base_price <= -100:
+            can_buy = False
+        else:
+            can_buy = True
 
         return self._get_observation(), self._rewards(), self._is_done(), [{'stop_loss': self.p_agent_is_stop_loss,
                                                                             'stop_loss_price': self.p_agent_is_stop_loss_price,
                                                                             'reached_profit': self.p_agent_is_reached_goal,
-                                                                            'best_price':best_price}]
+                                                                            'best_price': best_price,
+                                                                            'can_buy': can_buy}]
 
     def reset(self):
         """Reset the state of the environment and returns an initial observation.
