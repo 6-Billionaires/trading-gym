@@ -255,10 +255,9 @@ class TradingGymEnv(Env):
             done (boolean): whether the episode has ended, in which case further step() calls will return undefined results
             info (dict): contains auxiliary diagnostic information (helpful for debugging, and sometimes learning)
         """
-        self.p_agent_current_step_in_episode = self.p_agent_current_step_in_episode + 1
-
-        base_price = self.p_agent_current_episode_data_quote.loc[
-            self.c_agent_range_timestamp[self.p_agent_current_step_in_episode]]['Price(last excuted)']
+        # base_price is the price that agent can buy the stock at now.
+        base_price = self.p_agent_current_episode_data_order.loc[
+            self.c_agent_range_timestamp[self.p_agent_current_step_in_episode]]['SellHoga1']
 
         info = []
 
@@ -285,6 +284,9 @@ class TradingGymEnv(Env):
                     best_price = present_price
             else:
                 pass
+
+        # adding one step after all processes are done.
+        self.p_agent_current_step_in_episode = self.p_agent_current_step_in_episode + 1
 
         return self._get_observation(), self._rewards(), self._is_done(), [{'stop_loss': self.p_agent_is_stop_loss,
                                                                             'stop_loss_price': self.p_agent_is_stop_loss_price,
