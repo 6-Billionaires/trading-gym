@@ -219,7 +219,7 @@ class TradingGymEnv(Env):
     def init_observation(self):
         return self._get_observation()
 
-    def _rewards(self, observation, done, info):
+    def _rewards(self, observation, action, done, info):
         """
         for now, reward is just additional information other than observation itself.
         @return: the price of the current episode's equity's price 60 secs ahead
