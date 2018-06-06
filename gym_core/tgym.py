@@ -293,24 +293,17 @@ class TradingGymEnv(Env):
             buy_price = -1
             last_price = -1
 
-<<<<<<< HEAD
-=======
-            buy_price, last_price = -1, -1
->>>>>>> 40bfa4b1795c43291b40283571337fe37072859b
             for idx, present_ts in enumerate(pd.date_range(
                     self.c_agent_range_timestamp[self.p_agent_current_step_in_episode],
                     self.c_agent_range_timestamp[
                         np.minimum(self.p_agent_current_step_in_episode+60, self.c_episode_max_step_count-1)], freq='S'
             )):
-<<<<<<< HEAD
-=======
 
                 if idx == 0:
                     buy_price = self.p_agent_current_episode_data_order.loc[present_ts]['SellHoga1']
                 if idx == 59:  # if you change the time window, you must change it.
                     last_price = self.p_agent_current_episode_data_order.loc[present_ts]['BuyHoga1']
 
->>>>>>> 40bfa4b1795c43291b40283571337fe37072859b
                 present_price = self.p_agent_current_episode_data_order.loc[present_ts]['BuyHoga1']
 
                 percent = ((present_price+100) - (base_price+100)) / ( base_price+100) * 100
