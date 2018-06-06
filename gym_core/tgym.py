@@ -293,16 +293,17 @@ class TradingGymEnv(Env):
             buy_price = -1
             last_price = -1
 
+            length = len(pd.date_range(
+                    self.c_agent_range_timestamp[self.p_agent_current_step_in_episode],
+                    self.c_agent_range_timestamp[
+                        np.minimum(self.p_agent_current_step_in_episode+60, self.c_episode_max_step_count-1)], freq='S'
+            ))
+
             for idx, present_ts in enumerate(pd.date_range(
                     self.c_agent_range_timestamp[self.p_agent_current_step_in_episode],
                     self.c_agent_range_timestamp[
                         np.minimum(self.p_agent_current_step_in_episode+60, self.c_episode_max_step_count-1)], freq='S'
             )):
-
-                if idx == 0:
-                    buy_price = self.p_agent_current_episode_data_order.loc[present_ts]['SellHoga1']
-                if idx == 59:  # if you change the time window, you must change it.
-                    last_price = self.p_agent_current_episode_data_order.loc[present_ts]['BuyHoga1']
 
                 present_price = self.p_agent_current_episode_data_order.loc[present_ts]['BuyHoga1']
 
@@ -310,7 +311,7 @@ class TradingGymEnv(Env):
 
                 if idx == 0:
                     buy_price = self.p_agent_current_episode_data_order.loc[present_ts]['SellHoga1']
-                if idx == 59:  # if you change the window size, you must change it.
+                if idx == length - 1:  # if you change the window size, you must change it.
                     last_price = self.p_agent_current_episode_data_order.loc[present_ts]['BuyHoga1']
 
                 if not self.p_agent_is_reached_goal and percent < 0 and self.percent_stop_loss <= np.abs(percent):
