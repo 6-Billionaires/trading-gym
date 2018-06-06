@@ -108,6 +108,8 @@ class TradingGymEnv(Env):
 
             for pf in glob.glob(item + '/*.csv', ):
                 f = pf.split('\\')[-1]
+                f = f.split('/')[-1]
+
                 """
                 1. condition
                     for now, there is only one episode type. 
@@ -130,16 +132,15 @@ class TradingGymEnv(Env):
                 current_date = f.split('-')[2]
 
                 d_meta = {'ticker': current_ticker, "date": current_date}  # 1
-
                 # TODO : it needs to be update load dataset out of file into pandas dataframe
                 if f.endswith('-order.csv'):
 
-                    if os.path.sep == '\\' :
+                    if os.path.sep == '\\' or '/':
                         d_order = pd.read_csv(item+'/'+f, index_col=0, parse_dates=True)  # 2
                     else:
                         d_order = pd.read_csv(f, index_col=0, parse_dates=True)  # 2
                 elif f.endswith('-quote.csv'):
-                    if os.path.sep == '\\':
+                    if os.path.sep == '\\' or '/':
                         d_quote = pd.read_csv(item+'/'+f, index_col=0, parse_dates=True)  # 3
                     else:
                         d_quote = pd.read_csv(f, index_col=0, parse_dates=True)  # 2
@@ -272,7 +273,6 @@ class TradingGymEnv(Env):
         ):
             present_price = self.p_agent_current_episode_data_order.loc[present_ts]['BuyHoga1']
 
-            # print(round(base_price, 3), round(present_price, 3))
             percent = ((present_price+100) - (base_price+100)) / ( base_price+100) * 100
 
             if not self.p_agent_is_reached_goal and percent < 0 and self.percent_stop_loss <= np.abs(percent):
