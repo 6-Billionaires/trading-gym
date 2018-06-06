@@ -1,0 +1,271 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>gym_core.tgym module &#8212; gym_core 1.0.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-gym_core.tgym">
+<span id="gym-core-tgym-module"></span><h1>gym_core.tgym module<a class="headerlink" href="#module-gym_core.tgym" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="gym_core.tgym.TradingGymEnv">
+<em class="property">class </em><code class="descclassname">gym_core.tgym.</code><code class="descname">TradingGymEnv</code><span class="sig-paren">(</span><em>episode_type=None</em>, <em>episode_duration_min=60</em>, <em>step_interval='1s'</em>, <em>percent_stop_loss=10</em>, <em>percent_goal_profit=2</em>, <em>balanace=None</em>, <em>max_num_of_transaction=10</em>, <em>obs_transform=None</em><span class="sig-paren">)</span><a class="headerlink" href="#gym_core.tgym.TradingGymEnv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">gym.core.Env</span></code></p>
+<dl class="attribute">
+<dt id="gym_core.tgym.TradingGymEnv.c_agent_max_num_of_allowed_transaction">
+<code class="descname">c_agent_max_num_of_allowed_transaction</code><em class="property"> = 10</em><a class="headerlink" href="#gym_core.tgym.TradingGymEnv.c_agent_max_num_of_allowed_transaction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gym_core.tgym.TradingGymEnv.c_agent_prev_step_start_datetime_in_episode">
+<code class="descname">c_agent_prev_step_start_datetime_in_episode</code><em class="property"> = None</em><a class="headerlink" href="#gym_core.tgym.TradingGymEnv.c_agent_prev_step_start_datetime_in_episode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gym_core.tgym.TradingGymEnv.c_agent_range_timestamp">
+<code class="descname">c_agent_range_timestamp</code><em class="property"> = []</em><a class="headerlink" href="#gym_core.tgym.TradingGymEnv.c_agent_range_timestamp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gym_core.tgym.TradingGymEnv.c_agent_step_start_datetime_in_episode">
+<code class="descname">c_agent_step_start_datetime_in_episode</code><em class="property"> = None</em><a class="headerlink" href="#gym_core.tgym.TradingGymEnv.c_agent_step_start_datetime_in_episode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gym_core.tgym.TradingGymEnv.create_episode_data">
+<code class="descname">create_episode_data</code><span class="sig-paren">(</span><em>episode_type</em><span class="sig-paren">)</span><a class="headerlink" href="#gym_core.tgym.TradingGymEnv.create_episode_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>it is executed just one time right after this gym is made for the first time.</p>
+<dl class="docutils">
+<dt># 1. Loading data into gym</dt>
+<dd>It loads csv files based on its episode type. Before, we need to ensure that those csv files have to locate in a
+directory where trading-episode-filter gathered according to rules of episode type</dd>
+<dt># 2. the file to be loaded</dt>
+<dd><ul class="first last simple">
+<li>data/episode_type/ticker/episode_type-ticker-yyyymmdd.csv</li>
+</ul>
+</dd>
+<dt># 3. csv format is look like below</dt>
+<dd>episode_type-AAPL-yyyymmdd-quote.csv,
+episode_type-AAPL-yyyymmdd-order.csv</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="gym_core.tgym.TradingGymEnv.d_episodes_data">
+<code class="descname">d_episodes_data</code><em class="property"> = {}</em><a class="headerlink" href="#gym_core.tgym.TradingGymEnv.d_episodes_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gym_core.tgym.TradingGymEnv.episode_data_count">
+<code class="descname">episode_data_count</code><em class="property"> = 0</em><a class="headerlink" href="#gym_core.tgym.TradingGymEnv.episode_data_count" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gym_core.tgym.TradingGymEnv.episode_duration_min">
+<code class="descname">episode_duration_min</code><em class="property"> = 60</em><a class="headerlink" href="#gym_core.tgym.TradingGymEnv.episode_duration_min" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class’s super class is from OpenAI Gym and extends to provide trading environment</p>
+<dl class="docutils">
+<dt># reference</dt>
+<dd><ul class="first last simple">
+<li><dl class="first docutils">
+<dt>keyword for trading</dt>
+<dd>. <a class="reference external" href="http://www.fo24.co.kr/bbs/print_view.html?id=167497&amp;code=bbs203">http://www.fo24.co.kr/bbs/print_view.html?id=167497&amp;code=bbs203</a></dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>doc</dt>
+<dd>. <a class="reference external" href="http://docs.python-guide.org/en/latest/writing/documentation/">http://docs.python-guide.org/en/latest/writing/documentation/</a></dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>style guide to write comment ( or docstring)</dt>
+<dd>. <a class="reference external" href="https://medium.com/&#64;kkweon/%ED%8C%8C%EC%9D%B4%EC%8D%AC-doc-%EC%8A%A4%ED%83%80%EC%9D%BC-%EA%B0%80%EC%9D%B4%EB%93%9C%EC%97%90-%EB%8C%80%ED%95%9C-%EC%A0%95%EB%A6%AC-b6d27cd0a27c">https://medium.com/&#64;kkweon/%ED%8C%8C%EC%9D%B4%EC%8D%AC-doc-%EC%8A%A4%ED%83%80%EC%9D%BC-%EA%B0%80%EC%9D%B4%EB%93%9C%EC%97%90-%EB%8C%80%ED%95%9C-%EC%A0%95%EB%A6%AC-b6d27cd0a27c</a>
+. <a class="reference external" href="http://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html">http://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html</a></dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="gym_core.tgym.TradingGymEnv.init_observation">
+<code class="descname">init_observation</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gym_core.tgym.TradingGymEnv.init_observation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gym_core.tgym.TradingGymEnv.is_data_loaded">
+<code class="descname">is_data_loaded</code><em class="property"> = False</em><a class="headerlink" href="#gym_core.tgym.TradingGymEnv.is_data_loaded" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gym_core.tgym.TradingGymEnv.p_agent_current_episode_data_order">
+<code class="descname">p_agent_current_episode_data_order</code><em class="property"> = None</em><a class="headerlink" href="#gym_core.tgym.TradingGymEnv.p_agent_current_episode_data_order" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gym_core.tgym.TradingGymEnv.p_agent_current_episode_data_quote">
+<code class="descname">p_agent_current_episode_data_quote</code><em class="property"> = None</em><a class="headerlink" href="#gym_core.tgym.TradingGymEnv.p_agent_current_episode_data_quote" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gym_core.tgym.TradingGymEnv.p_agent_current_episode_date">
+<code class="descname">p_agent_current_episode_date</code><em class="property"> = None</em><a class="headerlink" href="#gym_core.tgym.TradingGymEnv.p_agent_current_episode_date" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gym_core.tgym.TradingGymEnv.p_agent_current_episode_price_history">
+<code class="descname">p_agent_current_episode_price_history</code><em class="property"> = deque([], maxlen=60)</em><a class="headerlink" href="#gym_core.tgym.TradingGymEnv.p_agent_current_episode_price_history" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gym_core.tgym.TradingGymEnv.p_agent_current_episode_ref_idx">
+<code class="descname">p_agent_current_episode_ref_idx</code><em class="property"> = 0</em><a class="headerlink" href="#gym_core.tgym.TradingGymEnv.p_agent_current_episode_ref_idx" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gym_core.tgym.TradingGymEnv.p_agent_current_episode_ticker">
+<code class="descname">p_agent_current_episode_ticker</code><em class="property"> = None</em><a class="headerlink" href="#gym_core.tgym.TradingGymEnv.p_agent_current_episode_ticker" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gym_core.tgym.TradingGymEnv.p_agent_current_num_transaction">
+<code class="descname">p_agent_current_num_transaction</code><em class="property"> = 0</em><a class="headerlink" href="#gym_core.tgym.TradingGymEnv.p_agent_current_num_transaction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gym_core.tgym.TradingGymEnv.p_agent_current_step_in_episode">
+<code class="descname">p_agent_current_step_in_episode</code><em class="property"> = 0</em><a class="headerlink" href="#gym_core.tgym.TradingGymEnv.p_agent_current_step_in_episode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gym_core.tgym.TradingGymEnv.p_agent_is_reached_goal">
+<code class="descname">p_agent_is_reached_goal</code><em class="property"> = None</em><a class="headerlink" href="#gym_core.tgym.TradingGymEnv.p_agent_is_reached_goal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gym_core.tgym.TradingGymEnv.p_agent_is_stop_loss">
+<code class="descname">p_agent_is_stop_loss</code><em class="property"> = None</em><a class="headerlink" href="#gym_core.tgym.TradingGymEnv.p_agent_is_stop_loss" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gym_core.tgym.TradingGymEnv.p_agent_max_num_of_allowed_transaction">
+<code class="descname">p_agent_max_num_of_allowed_transaction</code><em class="property"> = 10</em><a class="headerlink" href="#gym_core.tgym.TradingGymEnv.p_agent_max_num_of_allowed_transaction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gym_core.tgym.TradingGymEnv.render">
+<code class="descname">render</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gym_core.tgym.TradingGymEnv.render" title="Permalink to this definition">¶</a></dt>
+<dd><p>Render the environment.
+display agent and gym’s status based on a user configures</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gym_core.tgym.TradingGymEnv.reset">
+<code class="descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gym_core.tgym.TradingGymEnv.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset the state of the environment and returns an initial observation.</p>
+<p>here we will reset agent’s enviroment to restart.
+for now, we need to have its database to load and the status will go back to its first status like it called init</p>
+<p>everytime, it needs to reset index to reference which index of episode data agent use training data.</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>numpy.array: The initial observation of the space. Initial reward is assumed to be 0.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="gym_core.tgym.TradingGymEnv.step">
+<code class="descname">step</code><span class="sig-paren">(</span><em>action</em><span class="sig-paren">)</span><a class="headerlink" href="#gym_core.tgym.TradingGymEnv.step" title="Permalink to this definition">¶</a></dt>
+<dd><p>Here is the interface to be called by its agent.
+_get_observation needs to be transformed using transform observation that __init__ received.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>action (object): for now, action is simple! 1 or -1 ( buy all or sell all )</dd>
+<dt>Returns:</dt>
+<dd>observation (object): agent’s observation of the current environment
+reward (float) : amount of reward returned after previous action
+done (boolean): whether the episode has ended, in which case further step() calls will return undefined results
+info (dict): contains auxiliary diagnostic information (helpful for debugging, and sometimes learning)</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/gym_core.tgym.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, 6billionaires.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/gym_core.tgym.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

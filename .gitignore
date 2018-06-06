@@ -2,6 +2,6 @@ gipython
 *.pyc
 .idea
 *.iml
-docs/_build
+#docs/_build
 config.py
 .idea/
