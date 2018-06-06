@@ -242,7 +242,23 @@ class TradingGymEnv(Env):
         return np.append(np.append(p0, p1), p2)
 
     def step(self, action):
+<<<<<<< HEAD
+        if action == 0:
+            self.p_agent_current_step_in_episode += 1
+            next_base_price = self.p_agent_current_episode_data_order.loc[
+                self.c_agent_range_timestamp[self.p_agent_current_step_in_episode]]['SellHoga1']
+            if next_base_price <= -100:
+                can_buy = False
+            else:
+                can_buy = True
+            return self._get_observation(), self._rewards(), self._is_done(), [{'stop_loss': False,
+                                                                                'stop_loss_price': -1,
+                                                                                'reached_profit': False,
+                                                                                'best_price': -1,
+                                                                                'can_buy': can_buy}]
+=======
 
+>>>>>>> 8212eab7d3919b6b48360e16ecc77c5bbfa807fe
         """
         Here is the interface to be called by its agent.
         _get_observation needs to be transformed using transform observation that __init__ received.
@@ -361,6 +377,9 @@ class TradingGymEnv(Env):
         self.p_agent_current_episode_data_order = self.d_episodes_data[self.p_agent_current_episode_ref_idx]['order']
 
         current_date = self.p_agent_current_episode_date
+
+        print(self.p_agent_current_episode_ticker)
+        print(self.p_agent_current_episode_date)
 
         # it can not declared in init method. because we need to consider yyyymmdd in future.
         self.c_agent_prev_step_start_datetime_in_episode = datetime.datetime(int(current_date[0:4]),
