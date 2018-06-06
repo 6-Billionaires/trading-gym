@@ -13,7 +13,6 @@ from collections import deque
 
 C_HOME_FULL_DIR = config.GYM['HOME']
 
-
 class TradingGymEnv(Env):
 
     d_episodes_data = {}
@@ -214,18 +213,18 @@ class TradingGymEnv(Env):
 
         self.p_agent_current_step_in_episode = 0
         self.p_agent_max_num_of_allowed_transaction = max_num_of_transaction
-        self.p_agent_is_stop_loss_price = None
+        self.p_agent_is_stop_loss_price = 0
 
 
     def init_observation(self):
         return self._get_observation()
 
-    def _rewards(self):
+    def _rewards(self, observation, done, info):
         """
         for now, reward is just additional information other than observation itself.
         @return: the price of the current episode's equity's price 60 secs ahead
         """
-        return None
+        raise NotImplementedError
 
     def _get_observation(self):
         """
@@ -240,9 +239,10 @@ class TradingGymEnv(Env):
         p1 = self.d_episodes_data[self.p_agent_current_episode_ref_idx]['order'].loc[self.c_agent_range_timestamp[self.p_agent_current_step_in_episode]]
         p2 = self.p_agent_current_episode_price_history
 
-        return p0, p1, p2
+        return np.append(np.append(p0, p1), p2)
 
     def step(self, action):
+<<<<<<< HEAD
         if action == 0:
             self.p_agent_current_step_in_episode += 1
             next_base_price = self.p_agent_current_episode_data_order.loc[
@@ -256,6 +256,9 @@ class TradingGymEnv(Env):
                                                                                 'reached_profit': False,
                                                                                 'best_price': -1,
                                                                                 'can_buy': can_buy}]
+=======
+
+>>>>>>> 8212eab7d3919b6b48360e16ecc77c5bbfa807fe
         """
         Here is the interface to be called by its agent.
         _get_observation needs to be transformed using transform observation that __init__ received.
@@ -268,50 +271,82 @@ class TradingGymEnv(Env):
             done (boolean): whether the episode has ended, in which case further step() calls will return undefined results
             info (dict): contains auxiliary diagnostic information (helpful for debugging, and sometimes learning)
         """
-        # base_price is the price that agent can buy the stock at now.
-        base_price = self.p_agent_current_episode_data_order.loc[
-            self.c_agent_range_timestamp[self.p_agent_current_step_in_episode]]['SellHoga1']
-
-        info = []
-
-        best_price = -10000000000
-        self.p_agent_is_stop_loss = False
-        self.p_agent_is_reached_goal = False
-
-        for present_ts in pd.date_range(
-                self.c_agent_range_timestamp[self.p_agent_current_step_in_episode],
-                self.c_agent_range_timestamp[
-                    np.minimum(self.p_agent_current_step_in_episode+60, self.c_episode_max_step_count-1)], freq='S'
-        ):
-            present_price = self.p_agent_current_episode_data_order.loc[present_ts]['BuyHoga1']
-
-            percent = ((present_price+100) - (base_price+100)) / ( base_price+100) * 100
-
-            if not self.p_agent_is_reached_goal and percent < 0 and self.percent_stop_loss <= np.abs(percent):
-                self.p_agent_is_stop_loss = True
-                self.p_agent_is_stop_loss_price = present_price  # TODO: ASK1 is correct price for stop loss ?!
-                break
-            elif percent > 0 and self.percent_goal_profit <= np.abs(percent):
-                self.p_agent_is_reached_goal = True
-                if best_price < present_price:
-                    best_price = present_price
+        if action == 0:
+            self.p_agent_current_step_in_episode = self.p_agent_current_step_in_episode + 1
+            next_base_price = self.p_agent_current_episode_data_order.loc[
+                self.c_agent_range_timestamp[self.p_agent_current_step_in_episode]]['SellHoga1']
+            if next_base_price <= -100:
+                can_buy = False
             else:
-                pass
+                can_buy = True
 
-        # adding one step after all processes are done.
-        self.p_agent_current_step_in_episode = self.p_agent_current_step_in_episode + 1
-        next_base_price = self.p_agent_current_episode_data_order.loc[
-            self.c_agent_range_timestamp[self.p_agent_current_step_in_episode]]['SellHoga1']
-        if next_base_price <= -100:
-            can_buy = False
-        else:
-            can_buy = True
+            # _info = [{'stop_loss': False,
+            #             'stop_loss_price': -1,
+            #             'reached_profit': False,
+            #             'best_price': -1,
+            #             'can_buy': can_buy}]
+            _info = {}
+            _info['stop_loss'] = False
+            _info['stop_loss_price'] = -1
+            _info['reached_profit'] = False
+            _info['best_price'] = -1
+            _info['can_buy'] = can_buy
 
-        return self._get_observation(), self._rewards(), self._is_done(), [{'stop_loss': self.p_agent_is_stop_loss,
-                                                                            'stop_loss_price': self.p_agent_is_stop_loss_price,
-                                                                            'reached_profit': self.p_agent_is_reached_goal,
-                                                                            'best_price': best_price,
-                                                                            'can_buy': can_buy}]
+            _observation = self._get_observation()
+            _done = self._is_done()
+
+            return _observation, self._rewards(_observation, action, _done, _info), _done, _info
+        else :
+
+            # base_price is the price that agent can buy the stock at now.
+            base_price = self.p_agent_current_episode_data_order.loc[
+                self.c_agent_range_timestamp[self.p_agent_current_step_in_episode]]['SellHoga1']
+
+            best_price = -10000000000
+            self.p_agent_is_stop_loss = False
+            self.p_agent_is_reached_goal = False
+
+            for present_ts in pd.date_range(
+                    self.c_agent_range_timestamp[self.p_agent_current_step_in_episode],
+                    self.c_agent_range_timestamp[
+                        np.minimum(self.p_agent_current_step_in_episode+60, self.c_episode_max_step_count-1)], freq='S'
+            ):
+                present_price = self.p_agent_current_episode_data_order.loc[present_ts]['BuyHoga1']
+
+                percent = ((present_price+100) - (base_price+100)) / ( base_price+100) * 100
+
+                if not self.p_agent_is_reached_goal and percent < 0 and self.percent_stop_loss <= np.abs(percent):
+                    self.p_agent_is_stop_loss = True
+                    self.p_agent_is_stop_loss_price = present_price  # TODO: ASK1 is correct price for stop loss ?!
+                    break
+                elif percent > 0 and self.percent_goal_profit <= np.abs(percent):
+                    self.p_agent_is_reached_goal = True
+                    if best_price < present_price:
+                        best_price = present_price
+                else:
+                    pass
+
+            # adding one step after all processes are done.
+            self.p_agent_current_step_in_episode = self.p_agent_current_step_in_episode + 1
+            next_base_price = self.p_agent_current_episode_data_order.loc[
+                self.c_agent_range_timestamp[self.p_agent_current_step_in_episode]]['SellHoga1']
+            if next_base_price <= -100:
+                can_buy = False
+            else:
+                can_buy = True
+
+            _info = {}
+            _info['stop_loss'] = self.p_agent_is_stop_loss
+            _info['stop_loss_price'] = self.p_agent_is_stop_loss_price
+            _info['reached_profit'] = self.p_agent_is_reached_goal
+            _info['best_price'] = best_price
+            _info['can_buy'] = can_buy
+
+            _observation = self._get_observation()
+            _done = self._is_done()
+
+            return _observation, self._rewards(_observation, action, _done, _info), _done, _info
+
 
     def reset(self):
         """Reset the state of the environment and returns an initial observation.
