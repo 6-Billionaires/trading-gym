@@ -112,6 +112,7 @@ class TradingGymEnv(Env):
             len(self.d_episodes_data.keys())
 
         logging.debug('There is no pickle file so that we are starting reading csv files.')
+
         for item in glob.glob(C_HOME_FULL_DIR + '/data/' + episode_type + '/*'):
             d_order = pd.DataFrame()
             d_quote = pd.DataFrame()
@@ -318,6 +319,7 @@ class TradingGymEnv(Env):
                     self.c_agent_range_timestamp[self.p_agent_current_step_in_episode],
                     self.c_agent_range_timestamp[
                         np.minimum(self.p_agent_current_step_in_episode+60, self.c_episode_max_step_count-1)], freq='S'
+
             )):
 
                 present_price = self.p_agent_current_episode_data_order.loc[present_ts]['BuyHoga1']
