@@ -180,7 +180,7 @@ class TradingGymEnv(Env):
                     #                                 'executed_strength', 'open', 'high', 'low', 'present_price'],
                     #                        index=pd.date_range(start='1/1/2016', periods=60 * 60, freq='S'))
 
-                except (KeyError, RuntimeError, TypeError, NameError):
+                except (KeyError, RuntimeError, TypeError, NameError, ValueError, Exception):
                     print('We got error in {}'.format(f))
 
             d_episode_data = {}
