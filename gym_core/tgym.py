@@ -10,6 +10,9 @@ import math
 import config
 import os
 from collections import deque
+import pickle
+import os.path
+import logging
 
 C_HOME_FULL_DIR = config.GYM['HOME']
 
@@ -19,6 +22,7 @@ class TradingGymEnv(Env):
 
     # every agent has their own constraints to be managed by trading gym itself.
     c_agent_max_num_of_allowed_transaction = 10
+    c_pickle_data_file = 'tgym-data.pickle'
 
     # c_agent_prev_step_start_yyyymmdd_in_episode = '090501'  # 9hr 6min 1sec
     # c_agent_step_start_yyyymmdd_in_episode = '090601' # 9hr 6min 1sec
@@ -85,6 +89,7 @@ class TradingGymEnv(Env):
             return False
 
     def create_episode_data(self, episode_type):
+
         """
             it is executed just one time right after this gym is made for the first time.
 
@@ -99,13 +104,20 @@ class TradingGymEnv(Env):
                 episode_type-AAPL-yyyymmdd-quote.csv,
                 episode_type-AAPL-yyyymmdd-order.csv
         """
-        for idx, item in enumerate(glob.glob(C_HOME_FULL_DIR + '/data/' + episode_type + '/*')):
+        _idx = 0
 
+        if os.path.isfile(C_HOME_FULL_DIR + '/' + self.c_pickle_data_file):
+            logging.debug('It is loading pickle file instead of reading csv files for performance.')
+            d_episodes_data = pickle.load(open(C_HOME_FULL_DIR + '/' + self.c_pickle_data_file, "rb"))
+            len(self.d_episodes_data.keys())
+
+        logging.debug('There is no pickle file so that we are starting reading csv files.')
+        for item in glob.glob(C_HOME_FULL_DIR + '/data/' + episode_type + '/*'):
             d_order = pd.DataFrame()
             d_quote = pd.DataFrame()
             d_meta = {}
 
-            for pf in glob.glob(item + '/*.csv', ):
+            for pf in glob.glob(item + '/*-order.csv', ):
                 f = pf.split('\\')[-1]
                 f = f.split('/')[-1]
 
@@ -131,21 +143,20 @@ class TradingGymEnv(Env):
                 current_date = f.split('-')[2]
 
                 d_meta = {'ticker': current_ticker, "date": current_date}  # 1
-                # TODO : it needs to be update load dataset out of file into pandas dataframe
-                if f.endswith('-order.csv'):
 
-                    if os.path.sep == '\\' or '/':
-                        d_order = pd.read_csv(item+'/'+f, index_col=0, parse_dates=True)  # 2
-                    else:
-                        d_order = pd.read_csv(f, index_col=0, parse_dates=True)  # 2
-                elif f.endswith('-quote.csv'):
-                    if os.path.sep == '\\' or '/':
-                        d_quote = pd.read_csv(item+'/'+f, index_col=0, parse_dates=True)  # 3
-                    else:
-                        d_quote = pd.read_csv(f, index_col=0, parse_dates=True)  # 2
+
+                if os.path.sep == '\\' or '/':
+                    d_order = pd.read_csv(item+'/'+f, index_col=0, parse_dates=True)  # 2
                 else:
-                    pass
-                    #raise TradingException('it found out   a file followed by wrong convention.')
+                    d_order = pd.read_csv(f, index_col=0, parse_dates=True)  # 2
+
+                #
+                quote_f = episode_type + '-' + current_ticker + '-' + current_date + '-quote.csv'
+                if os.path.sep == '\\' or '/':
+                    d_quote = pd.read_csv(item+'/'+quote_f, index_col=0, parse_dates=True)  # 3
+                else:
+                    d_quote = pd.read_csv(quote_f, index_col=0, parse_dates=True)  # 3
+
 
                 # # TODO : delete below. it is just fake data of two above
                 # d_order = pd.DataFrame(np.random.randn(3600, 20),
@@ -167,7 +178,11 @@ class TradingGymEnv(Env):
             d_episode_data['quote'] = d_quote
             d_episode_data['order'] = d_order
 
-            self.d_episodes_data[idx] = d_episode_data
+            self.d_episodes_data[_idx] = d_episode_data
+            _idx = _idx + 1
+
+        logging.debug('we are saving pickle file not to load files again..')
+        pickle.dump(self.d_episodes_data, open(C_HOME_FULL_DIR + '/' + self.c_pickle_data_file, "wb"))
 
         return len(self.d_episodes_data.keys())
 
@@ -219,7 +234,7 @@ class TradingGymEnv(Env):
     def init_observation(self):
         return self._get_observation()
 
-    def _rewards(self, observation, done, info):
+    def _rewards(self, observation, action, done, info):
         """
         for now, reward is just additional information other than observation itself.
         @return: the price of the current episode's equity's price 60 secs ahead
@@ -242,7 +257,6 @@ class TradingGymEnv(Env):
         return np.append(np.append(p0, p1), p2)
 
     def step(self, action):
-
         """
         Here is the interface to be called by its agent.
         _get_observation needs to be transformed using transform observation that __init__ received.
@@ -275,6 +289,8 @@ class TradingGymEnv(Env):
             _info['reached_profit'] = False
             _info['best_price'] = -1
             _info['can_buy'] = can_buy
+            _info['buy_price'] = -1
+            _info['last_price'] = -1
 
             _observation = self._get_observation()
             _done = self._is_done()
@@ -289,15 +305,29 @@ class TradingGymEnv(Env):
             best_price = -10000000000
             self.p_agent_is_stop_loss = False
             self.p_agent_is_reached_goal = False
+            buy_price = -1
+            last_price = -1
 
-            for present_ts in pd.date_range(
+            length = len(pd.date_range(
                     self.c_agent_range_timestamp[self.p_agent_current_step_in_episode],
                     self.c_agent_range_timestamp[
                         np.minimum(self.p_agent_current_step_in_episode+60, self.c_episode_max_step_count-1)], freq='S'
-            ):
+            ))
+
+            for idx, present_ts in enumerate(pd.date_range(
+                    self.c_agent_range_timestamp[self.p_agent_current_step_in_episode],
+                    self.c_agent_range_timestamp[
+                        np.minimum(self.p_agent_current_step_in_episode+60, self.c_episode_max_step_count-1)], freq='S'
+            )):
+
                 present_price = self.p_agent_current_episode_data_order.loc[present_ts]['BuyHoga1']
 
                 percent = ((present_price+100) - (base_price+100)) / ( base_price+100) * 100
+
+                if idx == 0:
+                    buy_price = self.p_agent_current_episode_data_order.loc[present_ts]['SellHoga1']
+                if idx == length - 1:  # if you change the window size, you must change it.
+                    last_price = self.p_agent_current_episode_data_order.loc[present_ts]['BuyHoga1']
 
                 if not self.p_agent_is_reached_goal and percent < 0 and self.percent_stop_loss <= np.abs(percent):
                     self.p_agent_is_stop_loss = True
@@ -325,6 +355,8 @@ class TradingGymEnv(Env):
             _info['reached_profit'] = self.p_agent_is_reached_goal
             _info['best_price'] = best_price
             _info['can_buy'] = can_buy
+            _info['buy_price'] = buy_price
+            _info['last_price'] = last_price
 
             _observation = self._get_observation()
             _done = self._is_done()
@@ -352,6 +384,9 @@ class TradingGymEnv(Env):
         self.p_agent_current_episode_data_order = self.d_episodes_data[self.p_agent_current_episode_ref_idx]['order']
 
         current_date = self.p_agent_current_episode_date
+
+        print(self.p_agent_current_episode_ticker)
+        print(self.p_agent_current_episode_date)
 
         # it can not declared in init method. because we need to consider yyyymmdd in future.
         self.c_agent_prev_step_start_datetime_in_episode = datetime.datetime(int(current_date[0:4]),
@@ -387,3 +422,5 @@ class TradingGymEnv(Env):
         logs = {}
         logs['agent_current_num_transaction'] = self.p_agent_current_num_transaction
         return logs
+
+

@@ -5,3 +5,4 @@ gipython
 #docs/_build
 config.py
 .idea/
+*.pickle
