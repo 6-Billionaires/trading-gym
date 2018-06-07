@@ -85,6 +85,7 @@ class TradingGymEnv(Env):
             return False
 
     def create_episode_data(self, episode_type):
+
         """
             it is executed just one time right after this gym is made for the first time.
 
@@ -99,13 +100,14 @@ class TradingGymEnv(Env):
                 episode_type-AAPL-yyyymmdd-quote.csv,
                 episode_type-AAPL-yyyymmdd-order.csv
         """
-        for idx, item in enumerate(glob.glob(C_HOME_FULL_DIR + '/data/' + episode_type + '/*')):
+        _idx = 0
 
+        for item in glob.glob(C_HOME_FULL_DIR + '/data/' + episode_type + '/*'):
             d_order = pd.DataFrame()
             d_quote = pd.DataFrame()
             d_meta = {}
 
-            for pf in glob.glob(item + '/*.csv', ):
+            for pf in glob.glob(item + '/*-order.csv', ):
                 f = pf.split('\\')[-1]
                 f = f.split('/')[-1]
 
@@ -131,21 +133,20 @@ class TradingGymEnv(Env):
                 current_date = f.split('-')[2]
 
                 d_meta = {'ticker': current_ticker, "date": current_date}  # 1
-                # TODO : it needs to be update load dataset out of file into pandas dataframe
-                if f.endswith('-order.csv'):
 
-                    if os.path.sep == '\\' or '/':
-                        d_order = pd.read_csv(item+'/'+f, index_col=0, parse_dates=True)  # 2
-                    else:
-                        d_order = pd.read_csv(f, index_col=0, parse_dates=True)  # 2
-                elif f.endswith('-quote.csv'):
-                    if os.path.sep == '\\' or '/':
-                        d_quote = pd.read_csv(item+'/'+f, index_col=0, parse_dates=True)  # 3
-                    else:
-                        d_quote = pd.read_csv(f, index_col=0, parse_dates=True)  # 2
+
+                if os.path.sep == '\\' or '/':
+                    d_order = pd.read_csv(item+'/'+f, index_col=0, parse_dates=True)  # 2
                 else:
-                    pass
-                    #raise TradingException('it found out   a file followed by wrong convention.')
+                    d_order = pd.read_csv(f, index_col=0, parse_dates=True)  # 2
+
+                #
+                quote_f = episode_type + '-' + current_ticker + '-' + current_date + '-quote.csv'
+                if os.path.sep == '\\' or '/':
+                    d_quote = pd.read_csv(item+'/'+quote_f, index_col=0, parse_dates=True)  # 3
+                else:
+                    d_quote = pd.read_csv(quote_f, index_col=0, parse_dates=True)  # 3
+
 
                 # # TODO : delete below. it is just fake data of two above
                 # d_order = pd.DataFrame(np.random.randn(3600, 20),
@@ -167,7 +168,8 @@ class TradingGymEnv(Env):
             d_episode_data['quote'] = d_quote
             d_episode_data['order'] = d_order
 
-            self.d_episodes_data[idx] = d_episode_data
+            self.d_episodes_data[_idx] = d_episode_data
+            _idx = _idx + 1
 
         return len(self.d_episodes_data.keys())
 
@@ -407,3 +409,5 @@ class TradingGymEnv(Env):
         logs = {}
         logs['agent_current_num_transaction'] = self.p_agent_current_num_transaction
         return logs
+
+
