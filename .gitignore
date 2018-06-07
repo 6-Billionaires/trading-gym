@@ -6,3 +6,4 @@ gipython
 config.py
 .idea/
 *.pickle
+*.log
