@@ -15,6 +15,8 @@ import os.path
 import logging
 import time
 
+#logging.basicConfig(filename='logs/trading-gym-{}.log'.format(time.strftime('%Y%m%d%H%M%S')),level=logging.DEBUG)
+#C_HOME_FULL_DIR = os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 logging.basicConfig(filename='trading-gym-{}.log'.format(time.strftime('%Y%m%d%H%M%S')),level=logging.DEBUG)
 C_HOME_FULL_DIR = config.GYM['HOME']
 
@@ -44,6 +46,7 @@ class TradingGymEnv(Env):
     p_max_num_of_allowed_transaction = 10
     p_is_stop_loss = None
     p_is_reached_goal = None
+
 
     is_data_loaded = False
     episode_data_count = 0
@@ -193,7 +196,7 @@ class TradingGymEnv(Env):
 
         return len(self.d_episodes_data.keys())
 
-    def __init__(self, episode_type=None, episode_duration_min = 60, step_interval='1s', percent_stop_loss=10, percent_goal_profit = 2,
+    def __init__(self, episode_type=None, episode_duration_min = 1, step_interval='1s', percent_stop_loss=10, percent_goal_profit = 2,
                  balanace = None, max_num_of_transaction=10, obs_transform=None):
         """
         Initialize environment
