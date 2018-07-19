@@ -7,3 +7,4 @@ config.py
 .idea/
 *.pickle
 *.log
+.h5f
