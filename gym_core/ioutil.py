@@ -64,7 +64,7 @@ def load_data_from_dicrectory(episode_type, max_n_episode=None):
             current_date = f.split('-')[2]
 
             d = load_single_data_from_pair_files(episode_type, current_ticker, current_date)
-            print(d)
+            # print(d)
             l.append(d)
     return l
 
