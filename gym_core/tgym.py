@@ -14,7 +14,7 @@ import pickle
 import os.path
 import logging
 import time
-import ioutil
+import gym_core.ioutil
 
 #logging.basicConfig(filename='trading-gym-{}.log'.format(time.strftime('%Y%m%d%H%M%S')),level=logging.DEBUG)
 import logging
