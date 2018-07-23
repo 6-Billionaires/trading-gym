@@ -85,16 +85,14 @@ def load_single_data_from_pair_files(episode_type, ticker, yyyymmdd):
     f_quote = make_dir(dir_gym_home,'data',episode_type,ticker,episode_type+'-'+ticker+'-'+yyyymmdd+'-quote.csv')
     d_meta = {'ticker': ticker, "date": yyyymmdd}  # 1
 
-    if os.path.sep == '\\' or '/':
-        try :
-            d_order = pd.read_csv(f_order, index_col=0, parse_dates=True)  #2
-        except Exception as e:
-            print('{} file caused error {}'.format(f_order,e))
-    else:
-        try:
-            d_quote = pd.read_csv(f_quote, index_col=0, parse_dates=True)  #2
-        except Exception as e:
-            print('{} file caused error {}'.format(f_quote,e))
+    try :
+        d_order = pd.read_csv(f_order, index_col=0, parse_dates=True)  #2
+    except Exception as e:
+        print('{} file caused error {}'.format(f_order,e))
+    try:
+        d_quote = pd.read_csv(f_quote, index_col=0, parse_dates=True)  #2
+    except Exception as e:
+        print('{} file caused error {}'.format(f_quote,e))
 
     d_episode_data = {}
     d_episode_data['meta'] = d_meta
