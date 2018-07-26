@@ -100,7 +100,7 @@ class TradingGymEnv(Env):
         else:
             return False
 
-    def create_episode_data(self, episode_type):
+    def create_episode_data(self, episode_type, episode_count=1):
         """
             it is executed just one time right after this gym is made for the first time.
 
@@ -123,10 +123,10 @@ class TradingGymEnv(Env):
                           'of equities and loaded {} equities information.'.format(len(self.d_episodes_data.keys())))
         else:
             logging.debug('There is no pickle file so that we are starting reading csv files.')
-            self.d_episodes_data[_idx] = ioutil.load_data_from_dicrectory('0', 3)
+            self.d_episodes_data = ioutil.load_data_from_dicrectory('0', episode_count)
             logging.debug('we are saving pickle file not to load files again..')
             pickle.dump(self.d_episodes_data, open(c_home_full_dir + '/' + self.c_pickle_data_file, "wb"))
-        return len(self.d_episodes_data.keys())
+        return len(self.d_episodes_data)
 
     def __init__(self, episode_type=None, episode_duration_min = 60, step_interval='1s', percent_stop_loss=10, percent_goal_profit = 2,
                  balanace = None, max_num_of_transaction=10, obs_transform=None):
