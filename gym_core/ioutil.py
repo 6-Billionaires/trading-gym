@@ -42,7 +42,15 @@ def make_dir(*d_args):
     return dir
 
 
-def load_data_from_dicrectory(episode_type, max_n_episode=None):
+
+def load_ticker_yyyymmdd_list_from_directory(d):
+    ticker_yyyymmdd_list = []
+    for idx, item in enumerate(glob.glob(make_dir(d, '*.pickle'))):
+        ticker_yyyymmdd_list.append((item.split(c_delim)[-1][0:8], item.split(c_delim)[-1][9:15]))
+    return ticker_yyyymmdd_list
+
+
+def load_data_from_directory(episode_type, max_n_episode=None):
     """
     load every equities data out of a directory
     :param root_dir:
@@ -107,5 +115,8 @@ ticker = '002150'
 yyyymmdd = '20180417'
 
 if __name__ == '__main__':
-    print(load_single_data_from_pair_files(episode_type,ticker, yyyymmdd))
-    print(load_data_from_dicrectory(episode_type, 10))
+    d = 'C:\\Git\\trading-agent\\buy_signal_agent\\verystrongjoe'
+    # print(load_single_data_from_pair_files(episode_type,ticker, yyyymmdd))
+    # print(load_data_from_directory(episode_type, 10))
+    print(load_ticker_yyyymmdd_list_from_directory(d))
+
