@@ -41,6 +41,15 @@ def make_dir(*d_args):
             dir += d
     return dir
 
+def runtime(f):
+    def wrapper(*args, **kwargs):
+        import timeit
+        start = timeit.default_timer()
+        f(*args, **kwargs)
+        end = timeit.default_timer()
+        print('executed time : ', end - start)
+        return f(*args, **kwargs)
+    return wrapper
 
 
 def load_ticker_yyyymmdd_list_from_directory(d):
@@ -53,9 +62,8 @@ def load_ticker_yyyymmdd_list_from_directory(d):
 def load_data_from_directory(episode_type, max_n_episode=None):
     """
     load every equities data out of a directory
-    :param root_dir:
-    :param episode_type:
-    :param max_n_episode: if you run it locally, you can set maximum number of files to read.
+    :param episode_type: for now, it has only 0.
+    :param max_n_episode: It is just for quick test.you can give maximum row count while reading file.
     :return:
     """
     l = []
