@@ -33,6 +33,30 @@ You can clone two repository into your local computer or cloud whatever. And you
 
 
 
+You can do install of trading gym simply with:
+
+```
+git clone https://github.com/6-Billionaires/trading-gym.git
+```
+
+
+
+## Quick Run
+
+```
+env = MyTGym(episode_type='0', percent_goal_profit=2, percent_stop_loss=5, episode_duration_min=60) # set env.
+
+state = env.reset() # initiate env and get state
+
+next_state, reward, done, info = env.step(action) # Do action and get next step information
+```
+
+An environment for learning reinforcement learning has been created, and reinforcement learning can be learned by designing agents.
+
+
+
+
+
 ## Data
 
 You have to put trade orderbook and execution data into data folder. You must use the data in accordance with the format. The data format can be found in the 'data' folder on github.
@@ -55,6 +79,10 @@ Trade Execution Data Format
 
 - File name format : 'Episode type'-'Stock code'-'Date'-quote.csv
 - It have 12 columns with time, price(last executed), Buy/Sell/Total executed, Buy/Sell/Total Weighted Price, Execution Strength, Open/High/Low Price
+
+
+
+
 
 
 
