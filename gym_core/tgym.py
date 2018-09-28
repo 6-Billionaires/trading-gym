@@ -120,10 +120,10 @@ class TradingGymEnv(Env):
 
             self.d_episodes_data = pickle.load(open(c_home_full_dir + '/' + self.c_pickle_data_file, "rb"))
             logging.debug('it loaded pickle file without reading csv file' +
-                          'of equities and loaded {} equities information.'.format(len(self.d_episodes_data.keys())))
+                          'of equities and loaded {} equities information.'.format(len(self.d_episodes_data)))
         else:
             logging.debug('There is no pickle file so that we are starting reading csv files.')
-            self.d_episodes_data = ioutil.load_data_from_dicrectory('0', episode_count)
+            self.d_episodes_data = ioutil.load_data_from_directory(c_home_full_dir, '0', episode_count)
             logging.debug('we are saving pickle file not to load files again..')
             pickle.dump(self.d_episodes_data, open(c_home_full_dir + '/' + self.c_pickle_data_file, "wb"))
         return len(self.d_episodes_data)
@@ -148,7 +148,7 @@ class TradingGymEnv(Env):
         """
         # self.episode_data_count = 0
         if not self.is_data_loaded:
-            self.episode_data_count = self.create_episode_data(episode_type)
+            self.episode_data_count = self.create_episode_data(episode_type, 1000)
 
         # for now, episode type is not considered.
         # self.p_current_episode_ref_idx = random.randint(0, self.episode_data_count - 1)
