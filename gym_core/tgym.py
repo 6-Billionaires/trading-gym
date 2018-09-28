@@ -99,7 +99,7 @@ class TradingGymEnv(Env):
         else:
             return False
 
-    def create_episode_data(self, episode_type, episode_count=1):
+    def create_episode_data(self, episode_type, episode_count=1000000):
         """
             it is executed just one time right after this gym is made for the first time.
 
