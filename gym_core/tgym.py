@@ -149,7 +149,7 @@ class TradingGymEnv(Env):
         """
         # self.episode_data_count = 0
         if not self.is_data_loaded:
-            self.episode_data_count = self.create_episode_data(episode_type, 1000)
+            self.episode_data_count = self.create_episode_data(episode_type)
 
         # for now, episode type is not considered.
         # self.p_current_episode_ref_idx = random.randint(0, self.episode_data_count - 1)
