@@ -47,7 +47,6 @@ class TradingGymEnv(Env):
     p_is_stop_loss = None
     p_is_reached_goal = None
 
-
     is_data_loaded = False
     episode_data_count = 0
     episode_duration_min = 60
@@ -196,7 +195,7 @@ class TradingGymEnv(Env):
 
         return len(self.d_episodes_data.keys())
 
-    def __init__(self, episode_type=None, episode_duration_min = 1, step_interval='1s', percent_stop_loss=10, percent_goal_profit = 2,
+    def __init__(self, episode_type=None, episode_duration_min = 60, step_interval='1s', percent_stop_loss=10, percent_goal_profit = 2,
                  balanace = None, max_num_of_transaction=10, obs_transform=None):
         """
         Initialize environment
@@ -264,7 +263,10 @@ class TradingGymEnv(Env):
         p1 = self.d_episodes_data[self.p_current_episode_ref_idx]['order'].loc[self.c_range_timestamp[self.p_current_step_in_episode]]
         p2 = self.p_current_episode_price_history
 
-        return np.append(np.append(p0, p1), p2[-1])
+        return self.observation_processor(np.append(np.append(p0, p1), p2[-1]))
+
+    def observation_processor(self, observation):
+        return observation
 
     def step(self, action):
         """
