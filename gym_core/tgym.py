@@ -56,7 +56,6 @@ class TradingGymEnv(Env):
     p_is_stop_loss = None
     p_is_reached_goal = None
 
-
     is_data_loaded = False
     episode_data_count = 0
     episode_duration_min = 60
@@ -118,15 +117,17 @@ class TradingGymEnv(Env):
         # Loading pickle file
         if os.path.isfile(ioutil.make_dir(c_home_full_dir, self.c_pickle_data_file)):
             logging.debug('It is loading pickle file instead of reading csv files for performance.')
+
             self.d_episodes_data = pickle.load(open(c_home_full_dir + '/' + self.c_pickle_data_file, "rb"))
             logging.debug('it loaded pickle file without reading csv file' +
-                          'of equities and loaded {} equities information.'.format(len(self.d_episodes_data.keys())))
+                          'of equities and loaded {} equities information.'.format(len(self.d_episodes_data)))
         else:
             logging.debug('There is no pickle file so that we are starting reading csv files.')
-            self.d_episodes_data = ioutil.load_data_from_dicrectory('0', episode_count)
+            self.d_episodes_data = ioutil.load_data_from_directory(c_home_full_dir, '0', episode_count)
             logging.debug('we are saving pickle file not to load files again..')
             pickle.dump(self.d_episodes_data, open(c_home_full_dir + '/' + self.c_pickle_data_file, "wb"))
         return len(self.d_episodes_data)
+
 
     def __init__(self, episode_type=None, episode_duration_min = 60, step_interval='1s', percent_stop_loss=10, percent_goal_profit = 2,
                  balanace = None, max_num_of_transaction=10, obs_transform=None):
@@ -192,7 +193,10 @@ class TradingGymEnv(Env):
         p1 = self.d_episodes_data[self.p_current_episode_ref_idx]['order'].loc[self.c_range_timestamp[self.p_current_step_in_episode]]
         p2 = self.p_current_episode_price_history
 
-        return np.append(np.append(p0, p1), p2[-1])
+        return self.observation_processor(np.append(np.append(p0, p1), p2[-1]))
+
+    def observation_processor(self, observation):
+        return observation
 
     def step(self, action):
         """
