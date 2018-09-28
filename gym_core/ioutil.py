@@ -73,6 +73,7 @@ def load_data_from_directory(dir, episode_type, max_n_episode=None):
     :return:
     """
     l = []
+    
 
     for idx, item in enumerate(glob.glob(make_dir(dir + '/data', episode_type, '*'))):
         print('item :', item)
