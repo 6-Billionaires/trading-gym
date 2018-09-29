@@ -74,7 +74,7 @@ def load_data_from_directory(dir, episode_type, max_n_episode=None):
     """
     l = []
 
-    for idx, item in enumerate(glob.glob(make_dir(dir + '/data', episode_type, '*'))):
+    for idx, item in enumerate(glob.glob(make_dir(dir, episode_type, '*'))):
         for pf in glob.glob(make_dir(item, '/*-order.csv')):
 
             if max_n_episode is not None:
@@ -103,8 +103,8 @@ def load_single_data_from_pair_files(dir, episode_type, ticker, yyyymmdd):
     d_quote = pd.DataFrame()
     d_meta = {}
 
-    f_order = make_dir(dir+'/data', episode_type, ticker, episode_type+'-'+ticker+'-'+yyyymmdd+'-order.csv')
-    f_quote = make_dir(dir+'/data', episode_type, ticker, episode_type+'-'+ticker+'-'+yyyymmdd+'-quote.csv')
+    f_order = make_dir(dir, episode_type, ticker, episode_type+'-'+ticker+'-'+yyyymmdd+'-order.csv')
+    f_quote = make_dir(dir, episode_type, ticker, episode_type+'-'+ticker+'-'+yyyymmdd+'-quote.csv')
     d_meta = {'ticker': ticker, "date": yyyymmdd}  # 1
 
     try :
