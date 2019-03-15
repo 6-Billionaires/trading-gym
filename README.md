@@ -1,9 +1,9 @@
+
 # Trading Gym for Quantitative trading
 
 ## Intro
 
-This is a trading gym for any agent to trade for short term trading. We have enermous data for short term trading. We have been gathering for every Korean equities order and quote data every tick moment and also reflected data to our trading gym. **Trading Gym is a toolkit for developing and comparing reinforcement learning trading algorithms.**
-
+This is a trading gym for any agent to try trade for short term trading. We have collected enermous data for short term trading. We have been gathering for every Korean equities order and quote data every tick moment and also reflected data to our trading gym. **Trading Gym is a toolkit for developing and comparing reinforcement learning trading algorithms.**
 
 
 
@@ -13,12 +13,11 @@ There are two basic concepts in reinforcement learning: the environment (namely,
 
  **Trading Gym recreates market states based on trade orderbook and execution data. In this environment, you can make reinforcement learning agents learn how to trade.**
 
-The core gym interface is [Env](https://github.com/openai/gym/blob/master/gym/core.py), which is the unified environment interface. There is no interface for agents; that part is left to you. The following are the `Env` methods you should know:
+The core gym interface is same as OpenAI Gym [Env](https://github.com/openai/gym/blob/master/gym/core.py), which is the unified environment interface. There is no interface for agents; that part is left to you. The following are the `Env` methods you should know:
 
 - reset(self): Reset the environment's state. Returns observation.
-- step(self, action): Step the environment by one timestep. Returns observation, reward, done, info.
+- step(self, action): Take an action in the environment by one timestep. Returns observation, reward, done, info.
 - render(self, mode='human', close=False): Render one frame of the environment. Display gym's status based on a user configurations.
-
 
 
 
@@ -55,8 +54,6 @@ An environment for learning reinforcement learning has been created, and reinfor
 
 
 
-
-
 ## Data
 
 You have to put trade orderbook and execution data into data folder. You must use the data in accordance with the format. The data format can be found in the 'data' folder on github.
@@ -84,46 +81,41 @@ Trade Execution Data Format
 
 
 
-
-
 ## Agent with this gym
 
-[Here](https://github.com/6-Billionaires/trading-agent) can be reference. Those are that we built in temporary.
+[Here](https://github.com/6-Billionaires/trading-agent) can be reference. Those are that we built for currently working paper
 
 
 
 
 ## Reference
 
-### Other Gyms already built
 1. Trading gym followed by OpenAI Gym architecture, spread trading
-- https://github.com/Prediction-Machines/Trading-Gym
-
+    - https://github.com/Prediction-Machines/Trading-Gym
 2. Trading gym followed by OpenAI Gym architecture, easy to look around with ipython example
-- https://github.com/hackthemarket/gym-trading
-- https://github.com/hackthemarket/gym-trading/blob/master/gym_trading/envs/TradingEnv.ipynb
+    - https://github.com/hackthemarket/gym-trading
+    - https://github.com/hackthemarket/gym-trading/blob/master/gym_trading/envs/TradingEnv.ipynb
 
 3. Sairen
-- Trading gym using API of Interative Broker  
-- It is such a good reference for us. we will adapt live/paper mode feature of it.
-    - https://doctorj.gitlab.io/sairen/
-    - edemo / demouser
-    * TWS configuration
-        . TWS session will be set for socket port 7496 (live),
-        . a paper account session will listen on socket port 7497 (paper)
-        . https://interactivebrokers.github.io/tws-api/initial_setup.html#gsc.tab=0
-4. deep trader
-- [link](https://github.com/deependersingla/deep_trader)
-
-### Reinforcement learning
-[Algorithms collections based on OpenAI Gym](https://github.com/rll/rllab)
+    - Trading gym using API of Interative Broker  
+    - It is such a good reference for us. we will adapt live/paper mode feature of it.
+        - https://doctorj.gitlab.io/sairen/
+        - edemo / demouser
+        * TWS configuration
+            . TWS session will be set for socket port 7496 (live),
+            . a paper account session will listen on socket port 7497 (paper)
+            . https://interactivebrokers.github.io/tws-api/initial_setup.html#gsc.tab=0
+4. Others
+    - [deep trader](https://github.com/deependersingla/deep_trader)
+    - [Algorithms collections based on OpenAI Gym](https://github.com/rll/rllab)
 [best article](https://discuss.openai.com/t/gym-and-agent-for-algorithmic-stock-and-cryptocurrency-trading/519/23) to make trading gym on Discourse
 
-### Plan
-
+### Future Plan
 1. Packaging  
     [setup.py](https://www.digitalocean.com/community/tutorials/how-to-write-modules-in-python-3#accessing-modules-from-another-directory), [Upload package into pip repo ](https://stackoverflow.com/questions/15746675/how-to-write-a-python-module-package)
 2. Refactoring
     [1](http://docs.python-guide.org/en/latest/writing/structure/), [2](https://jeffknupp.com/blog/2014/02/04/starting-a-python-project-the-right-way/)
 
 3. Run this on cloud and allow every agent can access through REST API to train
+
+4. Provide simple running agent
