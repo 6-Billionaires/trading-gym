@@ -14,7 +14,10 @@ import pickle
 import os.path
 import logging
 import time
-from gym_core import ioutil
+from core import ioutil
+
+from core.spaces import Discrete
+
 
 #logging.basicConfig(filename='trading-gym-{}.log'.format(time.strftime('%Y%m%d%H%M%S')),level=logging.DEBUG)
 import logging
@@ -22,13 +25,13 @@ import logging
 logging.basicConfig(
     format="%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s",
     handlers=[
-        logging.FileHandler("{0}/{1}.log".format(config.GYM['HOME'], 'trading-gym-{}.log'
+        logging.FileHandler("{0}/{1}.log".format(config.home, 'trading-gym-{}.log'
                                                        .format(time.strftime('%Y%m%d%H%M%S')))),
         logging.StreamHandler()
     ])
 
 
-c_home_full_dir = config.GYM['HOME']
+c_home_full_dir = config.home
 
 class TradingGymEnv(Env):
 
@@ -126,6 +129,8 @@ class TradingGymEnv(Env):
             self.d_episodes_data = ioutil.load_data_from_directory(c_home_full_dir, '0', episode_count)
             logging.debug('we are saving pickle file not to load files again..')
             pickle.dump(self.d_episodes_data, open(c_home_full_dir + '/' + self.c_pickle_data_file, "wb"))
+
+            logging.info('{} data are loaded'.format(len(self.d_episodes_data)))
         return len(self.d_episodes_data)
 
 
@@ -173,6 +178,11 @@ class TradingGymEnv(Env):
         self.p_max_num_of_allowed_transaction = max_num_of_transaction
         self.p_is_stop_loss_price = 0
 
+        self.action_space = Discrete(2)  # buy or sell
+        self.observation_space = Discrete(((10, 2, 60, 2), (60, 11)))
+
+        self.holder_observation = deque(maxlen=60)
+
     def _rewards(self, observation, action, done, info):
         """
         for now, reward is just additional information other than observation itself.
@@ -195,8 +205,30 @@ class TradingGymEnv(Env):
 
         return self.observation_processor(np.append(np.append(p0, p1), p2[-1]))
 
+    # def observation_processor(self, observation):
+    #     return observation
     def observation_processor(self, observation):
-        return observation
+
+        self.holder_observation.append(observation)
+
+        while len(self.holder_observation) < 60:
+            self.holder_observation.append(observation)
+
+        # ((10,2,60,2), (60,11))
+        x1 = np.zeros([self.rows, self.columns, self.seconds, self.channels])  # prices(10), buy/sell(2), seconds(90), channels(buy or sell)(2) (10,2,90,2)
+        x2 = np.zeros([self.seconds, self.features])   # seconds(90), features(11) (90,11)
+
+        for row in range(self.rows):
+            for column in range(self.columns):
+                for second in range(self.seconds):
+                    for channel in range(self.channels):
+                        x1[row][column][second][channel] = self.holder_observation[second][11 + channel*20 + column*10 + row]
+
+        for second in range(self.seconds):
+            for feature in range(self.features):
+                x2[second][feature] = self.holder_observation[second][feature]
+
+        return [x1, x2]
 
     def step(self, action):
         """
@@ -353,7 +385,7 @@ class TradingGymEnv(Env):
             for prev_time_step in prev_read_rng:
                 self.p_current_episode_price_history.append(
                         self.p_current_episode_data_quote.loc[prev_time_step]['Price(last excuted)'])
-        except Exception:
+        except Exception as e:
             print('we get error')
 
 
