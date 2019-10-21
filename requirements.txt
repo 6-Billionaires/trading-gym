@@ -139,7 +139,7 @@ virtualenv==15.1.0
 wcwidth==0.1.7P
 webencodings==0.5.1
 websockets==4.0.1
-Werkzeug==0.14.1
+Werkzeug==0.15.3
 whichcraft==0.4.1
 widgetsnbextension==3.1.0
 yarl==1.2.2
