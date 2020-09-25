@@ -123,7 +123,7 @@ sklearn==0.0
 snowballstemmer==1.2.1
 Sphinx==1.7.5
 sphinxcontrib-websupport==1.1.0
-tensorflow==1.4.0
+tensorflow==1.15.4
 tensorflow-gpu==1.4.0
 tensorflow-tensorboard==0.4.0rc3
 testpath==0.3.1
