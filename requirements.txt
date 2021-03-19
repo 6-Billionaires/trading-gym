@@ -50,7 +50,7 @@ ipython-genutils==0.2.0
 ipywidgets==7.1.0
 itsdangerous==0.24
 jedi==0.11.1
-Jinja2==2.10
+Jinja2==2.11.3
 jinja2-time==0.2.0
 joblib==0.11
 jsonschema==2.6.0
