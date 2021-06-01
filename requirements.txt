@@ -134,7 +134,7 @@ tox==2.9.1
 tqdm==4.19.5
 traitlets==4.3.2
 twine==1.9.1
-urllib3==1.22
+urllib3==1.26.5
 virtualenv==15.1.0
 wcwidth==0.1.7P
 webencodings==0.5.1
