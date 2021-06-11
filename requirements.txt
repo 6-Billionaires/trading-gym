@@ -138,7 +138,7 @@ urllib3==1.22
 virtualenv==15.1.0
 wcwidth==0.1.7P
 webencodings==0.5.1
-websockets==4.0.1
+websockets==9.1
 Werkzeug==0.14.1
 whichcraft==0.4.1
 widgetsnbextension==3.1.0
