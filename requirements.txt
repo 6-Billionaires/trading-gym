@@ -5,7 +5,7 @@ argh==0.26.2
 arrow==0.12.0
 async-timeout==2.0.1
 attrs==17.4.0
-Babel==2.6.0
+Babel==2.9.1
 beautifulsoup4==4.6.0
 binaryornot==0.4.4
 bleach==1.5.0
