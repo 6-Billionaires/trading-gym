@@ -62,7 +62,7 @@ jupyterlab==0.31.2
 jupyterlab-launcher==0.10.3
 Keras==2.1.5
 keras-rl==0.4.0
-lxml==4.1.1
+lxml==4.6.5
 Mako==1.0.7
 Markdown==2.4.1
 MarkupSafe==1.0
