@@ -45,7 +45,7 @@ imagesize==1.0.0
 inotify==0.2.9
 inotify-simple==1.1.7
 ipykernel==4.7.0
-ipython==6.2.1
+ipython==7.16.3
 ipython-genutils==0.2.0
 ipywidgets==7.1.0
 itsdangerous==0.24
