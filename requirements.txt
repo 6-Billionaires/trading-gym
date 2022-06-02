@@ -35,7 +35,7 @@ greenlet==0.4.12
 gym==0.9.4
 gym-maze==0.4
 h5py==2.7.1
-html5lib==0.9999999
+html5lib==0.99999999
 IbPy2==0.8.0
 -e git+https://gitlab.com/doctorj/ibroke.git@dcb04b49b5135b9c38e7721f45ce0ce76b8b0d2d#egg=IBroke
 idna==2.6
